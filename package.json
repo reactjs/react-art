@@ -1,6 +1,6 @@
 {
   "name": "react-art",
-  "version": "0.4.1",
+  "version": "0.4.2-alpha",
   "keywords": [
     "react",
     "art",
@@ -24,7 +24,7 @@
   },
   "dependencies": {
     "art": "~0.9.0",
-    "react-tools": "~0.4.1"
+    "React": "git://github.com/facebook/react.git"
   },
   "devDependencies": {},
   "engines": {
