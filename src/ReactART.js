@@ -26,7 +26,7 @@ var Mode = require('art/modes/current');
 var ReactComponent = require('ReactComponent');
 var ReactMount = require('ReactMount');
 var ReactMultiChild = require('ReactMultiChild');
-var ReactNativeComponent = require('ReactNativeComponent');
+var ReactDOMComponent = require('ReactDOMComponent');
 
 var ReactComponentMixin = ReactComponent.Mixin;
 
@@ -171,12 +171,17 @@ var ContainerMixin = merge(ReactMultiChild.Mixin, {
 // Surface - Root node of all ART
 
 var Surface = createComponent(
-  ReactNativeComponent.Mixin,
+  ReactDOMComponent.Mixin,
   ReactComponentMixin,
   ContainerMixin, {
 
-  mountComponent: function(rootID, transaction) {
-    ReactComponentMixin.mountComponent.call(this, rootID, transaction);
+  mountComponent: function(rootID, transaction, mountDepth) {
+    ReactComponentMixin.mountComponent.call(
+      this,
+      rootID,
+      transaction,
+      mountDepth
+    );
     transaction.getReactOnDOMReady().enqueue(this, this.componentDidMount);
     // Temporary placeholder
     return '<div ' + ReactMount.ATTR_NAME + '="' + rootID + '"></div>';
@@ -207,7 +212,7 @@ var Surface = createComponent(
       // TODO: event listeners
     };
 
-    // We hack the internals of ReactNativeComponent to only update some DOM
+    // We hack the internals of ReactDOMComponent to only update some DOM
     // properties that won't override anything important that's internal to ART.
     this.props = nextPropsSubset;
     this._updateDOMProperties(prevPropsSubset);
@@ -476,22 +481,38 @@ var Shape = createComponent(RenderableMixin, {
 var Text = createComponent(RenderableMixin, {
 
   mountComponent: function() {
-    this.node = Mode.Text('');
-    this.applyTextProps(BLANK_PROPS, this.props);
+    var props = this.props;
+    var newString = childrenAsString(props.children);
+    this.node = Mode.Text(newString, props.font, props.alignment, props.path);
+    this._oldString = newString;
+    this.applyRenderableProps(BLANK_PROPS, this.props);
     return this.node;
   },
 
-  receiveProps: function(props) {
-    this.applyTextProps(this.props, props);
-    this.props = props;
+  isSameFont: function(oldFont, newFont) {
+    if (oldFont === newFont) {
+      return true;
+    }
+    if (typeof newFont === 'string' || typeof oldFont === 'string') {
+      return false;
+    }
+    return (
+      newFont.fontSize === oldFont.fontSize &&
+      newFont.fontStyle === oldFont.fontStyle &&
+      newFont.fontVariant === oldFont.fontVariant &&
+      newFont.fontWeight === oldFont.fontWeight &&
+      newFont.fontFamily === oldFont.fontFamily
+    );
   },
 
-  applyTextProps: function(oldProps, props) {
+  receiveProps: function(props) {
+    var oldProps = this.props;
+
     var oldString = this._oldString;
     var newString = childrenAsString(props.children);
 
     if (oldString !== newString ||
-        oldProps.font !== props.font ||
+        !this.isSameFont(oldProps.font, props.font) ||
         oldProps.alignment !== props.alignment ||
         oldProps.path !== props.path) {
       this.node.draw(
@@ -500,8 +521,11 @@ var Text = createComponent(RenderableMixin, {
         props.alignment,
         props.path
       );
+      this._oldString = newString;
     }
+
     this.applyRenderableProps(oldProps, props);
+    this.props = props;
   }
 
 });
