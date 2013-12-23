@@ -23,6 +23,7 @@ require('art/modes/fast'); // Flip this to DOM mode for debugging
 var Transform = require('art/core/transform');
 var Mode = require('art/modes/current');
 
+var DOMPropertyOperations = require('DOMPropertyOperations');
 var ReactComponent = require('ReactComponent');
 var ReactMount = require('ReactMount');
 var ReactMultiChild = require('ReactMultiChild');
@@ -30,7 +31,6 @@ var ReactDOMComponent = require('ReactDOMComponent');
 
 var ReactComponentMixin = ReactComponent.Mixin;
 
-var flattenChildren = require('flattenChildren'); // Should I use this?
 var mixInto = require('mixInto');
 var merge = require('merge');
 
@@ -54,9 +54,10 @@ function childrenAsString(children) {
   return '';
 }
 
-function createComponent() {
+function createComponent(name) {
   var ReactARTComponent = function() {};
-  for (var i = 0, l = arguments.length; i < l; i++) {
+  ReactARTComponent.displayName = name;
+  for (var i = 1, l = arguments.length; i < l; i++) {
     mixInto(ReactARTComponent, arguments[i]);
   }
   var ConvenienceConstructor = function(props, children) {
@@ -144,7 +145,7 @@ var ContainerMixin = merge(ReactMultiChild.Mixin, {
   /**
    * Override to bypass batch updating because it is not necessary.
    *
-   * @param {?object} nextChildren As returned by `flattenChildren`.
+   * @param {?object} nextChildren.
    * @param {ReactReconcileTransaction} transaction
    * @internal
    * @override {ReactMultiChild.Mixin.updateChildren}
@@ -158,7 +159,7 @@ var ContainerMixin = merge(ReactMultiChild.Mixin, {
 
   mountAndInjectChildren: function(children, transaction) {
     var mountedImages = this.mountChildren(
-      flattenChildren(children),
+      children,
       transaction
     );
     for (var i = 0; i < mountedImages.length; i++) {
@@ -171,6 +172,7 @@ var ContainerMixin = merge(ReactMultiChild.Mixin, {
 // Surface - Root node of all ART
 
 var Surface = createComponent(
+  'Surface',
   ReactDOMComponent.Mixin,
   ReactComponentMixin,
   ContainerMixin, {
@@ -182,9 +184,10 @@ var Surface = createComponent(
       transaction,
       mountDepth
     );
-    transaction.getReactOnDOMReady().enqueue(this, this.componentDidMount);
+    transaction.getReactMountReady().enqueue(this, this.componentDidMount);
     // Temporary placeholder
-    return '<div ' + ReactMount.ATTR_NAME + '="' + rootID + '"></div>';
+    var idMarkup = DOMPropertyOperations.createMarkupForID(rootID);
+    return '<div ' + idMarkup + '></div>';
   },
 
   setApprovedDOMProperties: function(nextProps) {
@@ -221,13 +224,14 @@ var Surface = createComponent(
     this.props = prevProps;
   },
 
-  componentDidMount: function(node) {
+  componentDidMount: function() {
     var props = this.props;
 
     this.node = Mode.Surface(+props.width, +props.height);
     var surfaceElement = this.node.toElement();
 
     // Replace placeholder hoping that nothing important happened to it
+    var node = this.getDOMNode();
     if (node.parentNode) {
       node.parentNode.replaceChild(surfaceElement, node);
     }
@@ -248,7 +252,8 @@ var Surface = createComponent(
     this.props = props;
   },
 
-  receiveProps: function(props, transaction) {
+  receiveComponent: function(nextComponent, transaction) {
+    var props = nextComponent.props;
     var node = this.node;
 
     if (this.props.width != props.width || this.props.width != props.height) {
@@ -257,7 +262,7 @@ var Surface = createComponent(
 
     this.setApprovedDOMProperties(props);
 
-    this.updateChildren(flattenChildren(props.children), transaction);
+    this.updateChildren(props.children, transaction);
 
     if (node.render) {
       node.render();
@@ -381,18 +386,20 @@ var NodeMixin = merge(ReactComponentMixin, {
 
 // Group
 
-var Group = createComponent(NodeMixin, ContainerMixin, {
+var Group = createComponent('Group', NodeMixin, ContainerMixin, {
 
   mountComponent: function(transaction) {
+    ReactComponentMixin.mountComponent.apply(this, arguments);
     this.node = Mode.Group();
     this.applyGroupProps(BLANK_PROPS, this.props);
     this.mountAndInjectChildren(this.props.children, transaction);
     return this.node;
   },
 
-  receiveProps: function(props, transaction) {
+  receiveComponent: function(nextComponent, transaction) {
+    var props = nextComponent.props;
     this.applyGroupProps(this.props, props);
-    this.updateChildren(flattenChildren(props.children), transaction);
+    this.updateChildren(props.children, transaction);
     this.props = props;
   },
 
@@ -408,6 +415,41 @@ var Group = createComponent(NodeMixin, ContainerMixin, {
   }
 
 });
+
+// ClippingRectangle
+var ClippingRectangle = createComponent(
+    'ClippingRectangle', NodeMixin, ContainerMixin, {
+
+  mountComponent: function(transaction) {
+    ReactComponentMixin.mountComponent.apply(this, arguments);
+    this.node = Mode.ClippingRectangle();
+    this.applyClippingProps(BLANK_PROPS, this.props);
+    this.mountAndInjectChildren(this.props.children, transaction);
+    return this.node;
+  },
+
+  receiveComponent: function(nextComponent, transaction) {
+    var props = nextComponent.props;
+    this.applyClippingProps(this.props, props);
+    this.updateChildren(props.children, transaction);
+    this.props = props;
+  },
+
+  applyClippingProps: function(oldProps, props) {
+    this.node.width = props.width;
+    this.node.height = props.height;
+    this.node.x = props.x;
+    this.node.y = props.y;
+    this.applyNodeProps(oldProps, props);
+  },
+
+  unmountComponent: function() {
+    this.destroyEventListeners();
+    this.unmountChildren();
+  }
+
+});
+
 
 // Renderables
 
@@ -445,15 +487,17 @@ var RenderableMixin = merge(NodeMixin, {
 
 // Shape
 
-var Shape = createComponent(RenderableMixin, {
+var Shape = createComponent('Shape', RenderableMixin, {
 
   mountComponent: function() {
+    ReactComponentMixin.mountComponent.apply(this, arguments);
     this.node = Mode.Shape();
     this.applyShapeProps(BLANK_PROPS, this.props);
     return this.node;
   },
 
-  receiveProps: function(props) {
+  receiveComponent: function(nextComponent, transaction) {
+    var props = nextComponent.props;
     this.applyShapeProps(this.props, props);
     this.props = props;
   },
@@ -478,9 +522,10 @@ var Shape = createComponent(RenderableMixin, {
 
 // Text
 
-var Text = createComponent(RenderableMixin, {
+var Text = createComponent('Text', RenderableMixin, {
 
   mountComponent: function() {
+    ReactComponentMixin.mountComponent.apply(this, arguments);
     var props = this.props;
     var newString = childrenAsString(props.children);
     this.node = Mode.Text(newString, props.font, props.alignment, props.path);
@@ -505,7 +550,8 @@ var Text = createComponent(RenderableMixin, {
     );
   },
 
-  receiveProps: function(props) {
+  receiveComponent: function(nextComponent, transaction) {
+    var props = nextComponent.props;
     var oldProps = this.props;
 
     var oldString = this._oldString;
@@ -534,21 +580,21 @@ var Text = createComponent(RenderableMixin, {
 
 var slice = Array.prototype.slice;
 
-var LinearGradient = function(stops, x1, y1, x2, y2) {
+function LinearGradient(stops, x1, y1, x2, y2) {
   this.args = slice.call(arguments);
 };
 LinearGradient.prototype.applyFill = function(node) {
   node.fillLinear.apply(node, this.args);
 };
 
-var RadialGradient = function(stops, fx, fy, rx, ry, cx, cy) {
+function RadialGradient(stops, fx, fy, rx, ry, cx, cy) {
   this.args = slice.call(arguments);
 };
 RadialGradient.prototype.applyFill = function(node) {
   node.fillRadial.apply(node, this.args);
 };
 
-var Pattern = function(url, width, height, left, top) {
+function Pattern(url, width, height, left, top) {
   this.args = slice.call(arguments);
 };
 Pattern.prototype.applyFill = function(node) {
@@ -564,6 +610,7 @@ var ReactART = {
   Path: Mode.Path,
   Surface: Surface,
   Group: Group,
+  ClippingRectangle: ClippingRectangle,
   Shape: Shape,
   Text: Text
 

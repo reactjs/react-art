@@ -32,13 +32,19 @@ var Shape;
 var Surface;
 var TestComponent;
 
+var Missing = {};
+
 function testDOMNodeStructure(domNode, expectedStructure) {
   expect(domNode).toBeDefined();
   expect(domNode.nodeName).toBe(expectedStructure.nodeName);
   for (var prop in expectedStructure) {
     if (!expectedStructure.hasOwnProperty(prop)) continue;
     if (prop != 'nodeName' && prop != 'children') {
-      expect(domNode.getAttribute(prop)).toBe(expectedStructure[prop]);
+      if (expectedStructure[prop] === Missing) {
+        expect(domNode.hasAttribute(prop)).toBe(false);
+      } else {
+        expect(domNode.getAttribute(prop)).toBe(expectedStructure[prop]);
+      }
     }
   }
   if (expectedStructure.children) {
@@ -95,15 +101,21 @@ describe('ReactART', function() {
 
         return (
           <Surface width={150} height={200}>
-            <Group>
+            <Group ref="group">
               {this.props.flipped ? [b, a, c] : [a, b, c]}
             </Group>
           </Surface>
         );
       }
-
     });
 
+  });
+
+  it('should have the correct lifecycle state', function() {
+    var instance = <TestComponent />;
+    ReactTestUtils.renderIntoDocument(instance);
+    var group = instance.refs.group;
+    expect(group._lifeCycleState).toBe('MOUNTED');
   });
 
   it('should render a reasonable SVG structure in SVG mode', function() {
@@ -150,7 +162,7 @@ describe('ReactART', function() {
           children: [
             { nodeName: 'DEFS' },
             { nodeName: 'PATH', opacity: '0.1' },
-            { nodeName: 'PATH', opacity: '' },
+            { nodeName: 'PATH', opacity: Missing },
             { nodeName: 'G' }
           ]
         }
@@ -170,7 +182,7 @@ describe('ReactART', function() {
           nodeName: 'G',
           children: [
             { nodeName: 'DEFS' },
-            { nodeName: 'PATH', opacity: '' },
+            { nodeName: 'PATH', opacity: Missing },
             { nodeName: 'PATH', opacity: '0.1' },
             { nodeName: 'G' }
           ]
