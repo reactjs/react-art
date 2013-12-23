@@ -23,16 +23,16 @@ require('art/modes/fast'); // Flip this to DOM mode for debugging
 var Transform = require('art/core/transform');
 var Mode = require('art/modes/current');
 
-var DOMPropertyOperations = require('DOMPropertyOperations');
-var ReactComponent = require('ReactComponent');
-var ReactMount = require('ReactMount');
-var ReactMultiChild = require('ReactMultiChild');
-var ReactDOMComponent = require('ReactDOMComponent');
+var DOMPropertyOperations = require('react/lib/DOMPropertyOperations');
+var ReactComponent = require('react/lib/ReactComponent');
+var ReactMount = require('react/lib/ReactMount');
+var ReactMultiChild = require('react/lib/ReactMultiChild');
+var ReactDOMComponent = require('react/lib/ReactDOMComponent');
 
 var ReactComponentMixin = ReactComponent.Mixin;
 
-var mixInto = require('mixInto');
-var merge = require('merge');
+var mixInto = require('react/lib/mixInto');
+var merge = require('react/lib/merge');
 
 // Used for comparison during mounting to avoid a lot of null checks
 var BLANK_PROPS = {};
