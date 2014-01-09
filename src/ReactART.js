@@ -109,10 +109,11 @@ var ContainerMixin = merge(ReactMultiChild.Mixin, {
    * Creates a child component.
    *
    * @param {ReactComponent} child Component to create.
+   * @param {object} childNode ART node to insert.
    * @protected
    */
-  createChild: function(child) {
-    var childNode = child._mountImage;
+  createChild: function(child, childNode) {
+    child._mountImage = childNode;
     var mostRecentlyPlacedChild = this._mostRecentlyPlacedChild;
     if (mostRecentlyPlacedChild == null) {
       // I'm supposed to be first.
@@ -140,6 +141,7 @@ var ContainerMixin = merge(ReactMultiChild.Mixin, {
    */
   removeChild: function(child) {
     child._mountImage.eject();
+    child._mountImage = null;
   },
 
   /**
@@ -162,8 +164,15 @@ var ContainerMixin = merge(ReactMultiChild.Mixin, {
       children,
       transaction
     );
-    for (var i = 0; i < mountedImages.length; i++) {
-      mountedImages[i].inject(this.node);
+    // Each mount image corresponds to one of the flattened children
+    var i = 0;
+    for (var key in this._renderedChildren) {
+      if (this._renderedChildren.hasOwnProperty(key)) {
+        var child = this._renderedChildren[key];
+        child._mountImage = mountedImages[i];
+        mountedImages[i].inject(this.node);
+        i++;
+      }
     }
   }
 
