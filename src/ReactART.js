@@ -467,13 +467,17 @@ var RenderableMixin = merge(NodeMixin, {
       oldProps.stroke !== props.stroke ||
       oldProps.strokeWidth !== props.strokeWidth ||
       oldProps.strokeCap !== props.strokeCap ||
-      oldProps.strokeJoin !== props.strokeJoin
+      oldProps.strokeJoin !== props.strokeJoin ||
+      // TODO: Consider a deep check of stokeDash.
+      // This may benefit the VML version in IE.
+      oldProps.strokeDash !== props.strokeDash
     ) {
       this.node.stroke(
         props.stroke,
         props.strokeWidth,
         props.strokeCap,
-        props.strokeJoin
+        props.strokeJoin,
+        props.strokeDash
       );
     }
     this.applyNodeProps(oldProps, props);
