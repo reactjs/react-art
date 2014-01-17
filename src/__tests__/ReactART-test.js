@@ -21,9 +21,6 @@
 
 "use strict";
 
-require('mock-modules')
-  .dontMock('ReactART');
-
 var React;
 var ReactTestUtils;
 
@@ -36,7 +33,7 @@ var Missing = {};
 
 function testDOMNodeStructure(domNode, expectedStructure) {
   expect(domNode).toBeDefined();
-  expect(domNode.nodeName).toBe(expectedStructure.nodeName);
+  expect(domNode.nodeName.toUpperCase()).toBe(expectedStructure.nodeName);
   for (var prop in expectedStructure) {
     if (!expectedStructure.hasOwnProperty(prop)) continue;
     if (prop != 'nodeName' && prop != 'children') {
@@ -57,10 +54,10 @@ function testDOMNodeStructure(domNode, expectedStructure) {
 describe('ReactART', function() {
 
   beforeEach(function() {
-    React = require('React');
-    ReactTestUtils = require('ReactTestUtils');
+    React = require('react');
+    ReactTestUtils = require('react/lib/ReactTestUtils');
 
-    var ReactART = require('ReactART');
+    var ReactART = require('../ReactART.js');
     var ARTSVGMode = require('art/modes/svg');
     var ARTCurrentMode = require('art/modes/current');
 
