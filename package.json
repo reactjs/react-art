@@ -26,7 +26,13 @@
     "art": "~0.9.0",
     "react": "0.8.0"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "jsx-loader": "git://github.com/petehunt/jsx-loader.git",
+    "webpack": "~1.0.0"
+  },
+  "scripts": {
+    "build:test": "webpack --devtool source-map src/__tests__/ReactART-test.js build/react-art-test.js"
+  },
   "engines": {
     "node": ">=0.10.0"
   }
