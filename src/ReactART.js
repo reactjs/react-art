@@ -66,6 +66,8 @@ function createComponent(name) {
     instance.construct.apply(instance, arguments);
     return instance;
   };
+  ConvenienceConstructor.type = ReactARTComponent;
+  ReactARTComponent.prototype.type = ReactARTComponent;
   return ConvenienceConstructor;
 }
 
