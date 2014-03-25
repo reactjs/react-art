@@ -1,5 +1,5 @@
 /**
- * Copyright 2013 Facebook, Inc.
+ * Copyright 2013-2014 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ var Transform = require('art/core/transform');
 var Mode = require('art/modes/current');
 
 var DOMPropertyOperations = require('react/lib/DOMPropertyOperations');
+var ReactBrowserComponentMixin = require('react/lib/ReactBrowserComponentMixin');
 var ReactComponent = require('react/lib/ReactComponent');
 var ReactMount = require('react/lib/ReactMount');
 var ReactMultiChild = require('react/lib/ReactMultiChild');
@@ -60,14 +61,20 @@ function createComponent(name) {
   for (var i = 1, l = arguments.length; i < l; i++) {
     mixInto(ReactARTComponent, arguments[i]);
   }
+
   var ConvenienceConstructor = function(props, children) {
     var instance = new ReactARTComponent();
     // Children can be either an array or more than one argument
     instance.construct.apply(instance, arguments);
     return instance;
   };
+
+  // Expose the convience constructor on the prototype so that it can be
+  // easily accessed on descriptors. E.g. <Foo />.type === Foo.type
+  // This for consistency with other descriptors and future proofing.
   ConvenienceConstructor.type = ReactARTComponent;
   ReactARTComponent.prototype.type = ReactARTComponent;
+
   return ConvenienceConstructor;
 }
 
@@ -186,7 +193,8 @@ var Surface = createComponent(
   'Surface',
   ReactDOMComponent.Mixin,
   ReactComponentMixin,
-  ContainerMixin, {
+  ContainerMixin,
+  ReactBrowserComponentMixin, {
 
   mountComponent: function(rootID, transaction, mountDepth) {
     ReactComponentMixin.mountComponent.call(
