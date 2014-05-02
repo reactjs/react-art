@@ -267,7 +267,7 @@ var Surface = createComponent(
     var props = nextComponent.props;
     var node = this.node;
 
-    if (this.props.width != props.width || this.props.width != props.height) {
+    if (this.props.width != props.width || this.props.height != props.height) {
       node.resize(+props.width, +props.height);
     }
 
