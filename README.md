@@ -6,7 +6,7 @@ It provides declarative and reactive bindings to the [ART library](https://githu
 
 Using the same declarative API you can render the output to either Canvas, SVG or VML (IE8).
 
-The easiest way to get started is by testing out the [art branch of the react-page project](https://github.com/facebook/react-page/tree/art).
+The `examples` directory contains a simple example of using React ART; you can also test out the [art branch of the react-page project](https://github.com/facebook/react-page/tree/art).
 
 ## Contribute
 
