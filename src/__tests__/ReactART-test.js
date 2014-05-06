@@ -1,5 +1,5 @@
 /**
- * Copyright 2013 Facebook, Inc.
+ * Copyright 2013-2014 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -113,14 +113,14 @@ describe('ReactART', function() {
 
   it('should have the correct lifecycle state', function() {
     var instance = <TestComponent />;
-    ReactTestUtils.renderIntoDocument(instance);
+    instance = ReactTestUtils.renderIntoDocument(instance);
     var group = instance.refs.group;
     expect(group._lifeCycleState).toBe('MOUNTED');
   });
 
   it('should render a reasonable SVG structure in SVG mode', function() {
     var instance = <TestComponent />;
-    ReactTestUtils.renderIntoDocument(instance);
+    instance = ReactTestUtils.renderIntoDocument(instance);
 
     var expectedStructure = {
       nodeName: 'SVG',
@@ -151,7 +151,7 @@ describe('ReactART', function() {
 
   it('should be able to reorder components', function() {
     var instance = <TestComponent flipped={false} />;
-    ReactTestUtils.renderIntoDocument(instance);
+    instance = ReactTestUtils.renderIntoDocument(instance);
 
     var expectedStructure = {
       nodeName: 'SVG',
