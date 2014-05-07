@@ -26,6 +26,7 @@ var Mode = require('art/modes/current');
 var DOMPropertyOperations = require('react/lib/DOMPropertyOperations');
 var ReactBrowserComponentMixin = require('react/lib/ReactBrowserComponentMixin');
 var ReactComponent = require('react/lib/ReactComponent');
+var ReactDescriptor = require('react/lib/ReactDescriptor');
 var ReactMount = require('react/lib/ReactMount');
 var ReactMultiChild = require('react/lib/ReactMultiChild');
 var ReactDOMComponent = require('react/lib/ReactDOMComponent');
@@ -56,24 +57,15 @@ function childrenAsString(children) {
 }
 
 function createComponent(name) {
-  var ReactARTComponent = function() {};
+  var ReactARTComponent = function(descriptor) {
+    this.construct(descriptor);
+  };
   ReactARTComponent.displayName = name;
   for (var i = 1, l = arguments.length; i < l; i++) {
     mixInto(ReactARTComponent, arguments[i]);
   }
 
-  var ConvenienceConstructor = function(props, children) {
-    var instance = new ReactARTComponent();
-    // Children can be either an array or more than one argument
-    instance.construct.apply(instance, arguments);
-    return instance;
-  };
-
-  // Expose the convience constructor on the prototype so that it can be
-  // easily accessed on descriptors. E.g. <Foo />.type === Foo.type
-  // This for consistency with other descriptors and future proofing.
-  ConvenienceConstructor.type = ReactARTComponent;
-  ReactARTComponent.prototype.type = ReactARTComponent;
+  var ConvenienceConstructor = ReactDescriptor.createFactory(ReactARTComponent);
 
   return ConvenienceConstructor;
 }
@@ -203,7 +195,7 @@ var Surface = createComponent(
       transaction,
       mountDepth
     );
-    transaction.getReactMountReady().enqueue(this, this.componentDidMount);
+    transaction.getReactMountReady().enqueue(this.componentDidMount, this);
     // Temporary placeholder
     var idMarkup = DOMPropertyOperations.createMarkupForID(rootID);
     return '<div ' + idMarkup + '></div>';
