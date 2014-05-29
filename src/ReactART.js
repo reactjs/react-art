@@ -30,6 +30,7 @@ var ReactDescriptor = require('react/lib/ReactDescriptor');
 var ReactMount = require('react/lib/ReactMount');
 var ReactMultiChild = require('react/lib/ReactMultiChild');
 var ReactDOMComponent = require('react/lib/ReactDOMComponent');
+var ReactUpdates = require('react/lib/ReactUpdates');
 
 var ReactComponentMixin = ReactComponent.Mixin;
 
@@ -251,14 +252,14 @@ var Surface = createComponent(
     this.props = {style:{}};
     this.setApprovedDOMProperties(props);
 
-    var transaction = ReactComponent.ReactReconcileTransaction.getPooled();
+    var transaction = ReactUpdates.ReactReconcileTransaction.getPooled();
     transaction.perform(
       this.mountAndInjectChildren,
       this,
       props.children,
       transaction
     );
-    ReactComponent.ReactReconcileTransaction.release(transaction);
+    ReactUpdates.ReactReconcileTransaction.release(transaction);
 
     this.props = props;
   },
