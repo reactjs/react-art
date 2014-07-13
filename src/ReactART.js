@@ -27,6 +27,7 @@ var DOMPropertyOperations = require('react/lib/DOMPropertyOperations');
 var ReactBrowserComponentMixin = require('react/lib/ReactBrowserComponentMixin');
 var ReactComponent = require('react/lib/ReactComponent');
 var ReactDescriptor = require('react/lib/ReactDescriptor');
+var ReactLegacyDescriptor = require('react/lib/ReactLegacyDescriptor');
 var ReactMount = require('react/lib/ReactMount');
 var ReactMultiChild = require('react/lib/ReactMultiChild');
 var ReactDOMComponent = require('react/lib/ReactDOMComponent');
@@ -68,7 +69,7 @@ function createComponent(name) {
 
   var ConvenienceConstructor = ReactDescriptor.createFactory(ReactARTComponent);
 
-  return ConvenienceConstructor;
+  return ReactLegacyDescriptor.wrapFactory(ConvenienceConstructor);
 }
 
 // ContainerMixin for components that can hold ART nodes
