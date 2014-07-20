@@ -400,7 +400,7 @@ var NodeMixin = merge(ReactComponentMixin, {
 
 var Group = createComponent('Group', NodeMixin, ContainerMixin, {
 
-  mountComponent: function(transaction) {
+  mountComponent: function(rootID, transaction, mountDepth) {
     ReactComponentMixin.mountComponent.apply(this, arguments);
     this.node = Mode.Group();
     this.applyGroupProps(BLANK_PROPS, this.props);
@@ -432,7 +432,7 @@ var Group = createComponent('Group', NodeMixin, ContainerMixin, {
 var ClippingRectangle = createComponent(
     'ClippingRectangle', NodeMixin, ContainerMixin, {
 
-  mountComponent: function(transaction) {
+  mountComponent: function(rootID, transaction, mountDepth) {
     ReactComponentMixin.mountComponent.apply(this, arguments);
     this.node = Mode.ClippingRectangle();
     this.applyClippingProps(BLANK_PROPS, this.props);
