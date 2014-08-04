@@ -193,4 +193,24 @@ describe('ReactART', function() {
     testDOMNodeStructure(realNode, expectedNewStructure);
   });
 
+  it('renders composite with lifecycle inside group', function() {
+    var mounted = false;
+    var CustomShape = React.createClass({
+      render: function() {
+        return <Shape />;
+      },
+      componentDidMount: function() {
+        mounted = true;
+      }
+    });
+    ReactTestUtils.renderIntoDocument(
+      <Surface>
+        <Group>
+          <CustomShape />
+        </Group>
+      </Surface>
+    );
+    expect(mounted).toBe(true);
+  });
+
 });
