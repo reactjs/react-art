@@ -4,7 +4,7 @@ To try this example, run:
 
 ```
 npm install
-webpack app.js bundle.js
+npm run-script build
 ```
 
 in this directory, then open index.html in your browser.
