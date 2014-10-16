@@ -35,9 +35,6 @@ var ReactUpdates = require('react/lib/ReactUpdates');
 
 var ReactComponentMixin = ReactComponent.Mixin;
 
-var mixInto = require('react/lib/mixInto');
-var merge = require('react/lib/merge');
-
 // Used for comparison during mounting to avoid a lot of null checks
 var BLANK_PROPS = {};
 
@@ -64,7 +61,7 @@ function createComponent(name) {
   };
   ReactARTComponent.displayName = name;
   for (var i = 1, l = arguments.length; i < l; i++) {
-    mixInto(ReactARTComponent, arguments[i]);
+    Object.assign(ReactARTComponent.prototype, arguments[i]);
   }
 
   var ConvenienceConstructor = ReactElement.createFactory(ReactARTComponent);
@@ -74,7 +71,7 @@ function createComponent(name) {
 
 // ContainerMixin for components that can hold ART nodes
 
-var ContainerMixin = merge(ReactMultiChild.Mixin, {
+var ContainerMixin = Object.assign({}, ReactMultiChild.Mixin, {
 
   /**
    * Moves a child component to the supplied index.
@@ -302,7 +299,7 @@ var EventTypes = {
   onClick: 'click'
 };
 
-var NodeMixin = merge(ReactComponentMixin, {
+var NodeMixin = Object.assign({}, ReactComponentMixin, {
 
   putEventListener: function(type, listener) {
     var subscriptions = this.subscriptions || (this.subscriptions = {});
@@ -466,7 +463,7 @@ var ClippingRectangle = createComponent(
 
 // Renderables
 
-var RenderableMixin = merge(NodeMixin, {
+var RenderableMixin = Object.assign({}, NodeMixin, {
 
   applyRenderableProps: function(oldProps, props) {
     if (oldProps.fill !== props.fill) {
