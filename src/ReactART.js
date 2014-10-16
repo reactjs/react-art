@@ -59,8 +59,8 @@ function childrenAsString(children) {
 }
 
 function createComponent(name) {
-  var ReactARTComponent = function(descriptor) {
-    this.construct(descriptor);
+  var ReactARTComponent = function(props) {
+    // This constructor and it's argument is currently used by mocks.
   };
   ReactARTComponent.displayName = name;
   for (var i = 1, l = arguments.length; i < l; i++) {
