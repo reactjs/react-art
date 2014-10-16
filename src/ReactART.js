@@ -26,6 +26,8 @@ var ReactMultiChild = require('react/lib/ReactMultiChild');
 var ReactDOMComponent = require('react/lib/ReactDOMComponent');
 var ReactUpdates = require('react/lib/ReactUpdates');
 
+var assign = require('react/lib/Object.assign');
+
 var ReactComponentMixin = ReactComponent.Mixin;
 
 // Used for comparison during mounting to avoid a lot of null checks
@@ -54,7 +56,7 @@ function createComponent(name) {
   };
   ReactARTComponent.displayName = name;
   for (var i = 1, l = arguments.length; i < l; i++) {
-    Object.assign(ReactARTComponent.prototype, arguments[i]);
+    assign(ReactARTComponent.prototype, arguments[i]);
   }
 
   var ConvenienceConstructor = ReactElement.createFactory(ReactARTComponent);
@@ -64,7 +66,7 @@ function createComponent(name) {
 
 // ContainerMixin for components that can hold ART nodes
 
-var ContainerMixin = Object.assign({}, ReactMultiChild.Mixin, {
+var ContainerMixin = assign({}, ReactMultiChild.Mixin, {
 
   /**
    * Moves a child component to the supplied index.
@@ -292,7 +294,7 @@ var EventTypes = {
   onClick: 'click'
 };
 
-var NodeMixin = Object.assign({}, ReactComponentMixin, {
+var NodeMixin = assign({}, ReactComponentMixin, {
 
   putEventListener: function(type, listener) {
     var subscriptions = this.subscriptions || (this.subscriptions = {});
@@ -456,7 +458,7 @@ var ClippingRectangle = createComponent(
 
 // Renderables
 
-var RenderableMixin = Object.assign({}, NodeMixin, {
+var RenderableMixin = assign({}, NodeMixin, {
 
   applyRenderableProps: function(oldProps, props) {
     if (oldProps.fill !== props.fill) {
