@@ -1,17 +1,10 @@
 /**
  * Copyright 2013-2014 Facebook, Inc.
+ * All rights reserved.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the root directory of this source tree. An additional grant
+ * of patent rights can be found in the PATENTS file in the same directory.
  *
  * @providesModule ReactART
  */
@@ -26,17 +19,16 @@ var Mode = require('art/modes/current');
 var DOMPropertyOperations = require('react/lib/DOMPropertyOperations');
 var ReactBrowserComponentMixin = require('react/lib/ReactBrowserComponentMixin');
 var ReactComponent = require('react/lib/ReactComponent');
-var ReactDescriptor = require('react/lib/ReactDescriptor');
-var ReactLegacyDescriptor = require('react/lib/ReactLegacyDescriptor');
+var ReactElement = require('react/lib/ReactElement');
+var ReactLegacyElement = require('react/lib/ReactLegacyElement');
 var ReactMount = require('react/lib/ReactMount');
 var ReactMultiChild = require('react/lib/ReactMultiChild');
 var ReactDOMComponent = require('react/lib/ReactDOMComponent');
 var ReactUpdates = require('react/lib/ReactUpdates');
 
-var ReactComponentMixin = ReactComponent.Mixin;
+var assign = require('react/lib/Object.assign');
 
-var mixInto = require('react/lib/mixInto');
-var merge = require('react/lib/merge');
+var ReactComponentMixin = ReactComponent.Mixin;
 
 // Used for comparison during mounting to avoid a lot of null checks
 var BLANK_PROPS = {};
@@ -59,22 +51,22 @@ function childrenAsString(children) {
 }
 
 function createComponent(name) {
-  var ReactARTComponent = function(descriptor) {
-    this.construct(descriptor);
+  var ReactARTComponent = function(props) {
+    // This constructor and it's argument is currently used by mocks.
   };
   ReactARTComponent.displayName = name;
   for (var i = 1, l = arguments.length; i < l; i++) {
-    mixInto(ReactARTComponent, arguments[i]);
+    assign(ReactARTComponent.prototype, arguments[i]);
   }
 
-  var ConvenienceConstructor = ReactDescriptor.createFactory(ReactARTComponent);
+  var ConvenienceConstructor = ReactElement.createFactory(ReactARTComponent);
 
-  return ReactLegacyDescriptor.wrapFactory(ConvenienceConstructor);
+  return ReactLegacyElement.wrapFactory(ConvenienceConstructor);
 }
 
 // ContainerMixin for components that can hold ART nodes
 
-var ContainerMixin = merge(ReactMultiChild.Mixin, {
+var ContainerMixin = assign({}, ReactMultiChild.Mixin, {
 
   /**
    * Moves a child component to the supplied index.
@@ -302,7 +294,7 @@ var EventTypes = {
   onClick: 'click'
 };
 
-var NodeMixin = merge(ReactComponentMixin, {
+var NodeMixin = assign({}, ReactComponentMixin, {
 
   putEventListener: function(type, listener) {
     var subscriptions = this.subscriptions || (this.subscriptions = {});
@@ -466,7 +458,7 @@ var ClippingRectangle = createComponent(
 
 // Renderables
 
-var RenderableMixin = merge(NodeMixin, {
+var RenderableMixin = assign({}, NodeMixin, {
 
   applyRenderableProps: function(oldProps, props) {
     if (oldProps.fill !== props.fill) {
