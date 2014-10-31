@@ -19,8 +19,6 @@ var Mode = require('art/modes/current');
 var DOMPropertyOperations = require('react/lib/DOMPropertyOperations');
 var ReactBrowserComponentMixin = require('react/lib/ReactBrowserComponentMixin');
 var ReactComponent = require('react/lib/ReactComponent');
-var ReactElement = require('react/lib/ReactElement');
-var ReactLegacyElement = require('react/lib/ReactLegacyElement');
 var ReactMount = require('react/lib/ReactMount');
 var ReactMultiChild = require('react/lib/ReactMultiChild');
 var ReactDOMComponent = require('react/lib/ReactDOMComponent');
@@ -59,9 +57,7 @@ function createComponent(name) {
     assign(ReactARTComponent.prototype, arguments[i]);
   }
 
-  var ConvenienceConstructor = ReactElement.createFactory(ReactARTComponent);
-
-  return ReactLegacyElement.wrapFactory(ConvenienceConstructor);
+  return ReactARTComponent;
 }
 
 // ContainerMixin for components that can hold ART nodes
