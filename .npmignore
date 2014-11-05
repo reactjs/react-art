@@ -1,4 +1,6 @@
 node_modules
 npm-debug.log
 .DS_Store
-src/__tests__
+src
+examples
+jest
