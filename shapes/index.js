@@ -7,9 +7,9 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
-var Circle = require('../src/Circle.art');
-var Rectangle = require('../src/Rectangle.art');
-var Wedge = require('../src/Wedge.art');
+var Circle = require('./circle');
+var Rectangle = require('./rectangle');
+var Wedge = require('./wedge');
 
 module.exports = {
   Circle: Circle,

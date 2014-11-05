@@ -7,4 +7,4 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
-module.exports = require('../src/Circle.art');
+module.exports = require('../lib/Circle.art');

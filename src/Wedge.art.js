@@ -22,8 +22,8 @@
  *
  */
 
-var React = require('React');
-var ReactART = require('ReactART');
+var React = require('react');
+var ReactART = require('./ReactART');
 
 var Props = React.PropTypes;
 var Shape = ReactART.Shape;
