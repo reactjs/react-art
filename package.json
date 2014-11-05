@@ -1,7 +1,7 @@
 {
   "name": "react-art",
   "description": "React ART is a JavaScript library for drawing vector graphics using React. It provides declarative and reactive bindings to the ART library. Using the same declarative API you can render the output to either Canvas, SVG or VML (IE8).",
-  "version": "0.12.1",
+  "version": "0.13.0-alpha",
   "keywords": [
     "react",
     "art",
@@ -21,15 +21,15 @@
     "art": "~0.9.0"
   },
   "peerDependencies": {
-    "react": "^0.12.0"
+    "react": "^0.13.0-alpha"
   },
   "devDependencies": {
     "del": "^0.1.3",
     "gulp": "^3.8.10",
     "gulp-react": "^2.0.0",
     "jest-cli": "^0.1.18",
-    "react": "^0.12.0",
-    "react-tools": "^0.12.0"
+    "react": "^0.13.0-alpha",
+    "react-tools": "^0.13.0-alpha"
   },
   "scripts": {
     "prepublish": "./node_modules/.bin/gulp",
