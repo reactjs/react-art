@@ -6,7 +6,6 @@
  * LICENSE file in the root directory of this source tree. An additional grant
  * of patent rights can be found in the PATENTS file in the same directory.
  *
- * @jsx React.DOM
  * @emails react-core
  */
 
@@ -204,6 +203,62 @@ describe('ReactART', function() {
       </Surface>
     );
     expect(mounted).toBe(true);
+  });
+
+  it('resolves refs before componentDidMount', function() {
+    var CustomShape = React.createClass({
+      render: function() {
+        return <Shape />;
+      }
+    });
+    var ref = null;
+    var Outer = React.createClass({
+      componentDidMount: function() {
+        ref = this.refs.test;
+      },
+      render: function() {
+        return (
+          <Surface>
+            <Group>
+              <CustomShape ref="test" />
+            </Group>
+          </Surface>
+        );
+      }
+    });
+    ReactTestUtils.renderIntoDocument(<Outer />);
+    expect(ref.constructor).toBe(CustomShape);
+  });
+
+  it('resolves refs before componentDidUpdate', function() {
+    var CustomShape = React.createClass({
+      render: function() {
+        return <Shape />;
+      }
+    });
+    var ref = {};
+    var Outer = React.createClass({
+      componentDidMount: function() {
+        ref = this.refs.test;
+      },
+      componentDidUpdate: function() {
+        ref = this.refs.test;
+      },
+      render: function() {
+        return (
+          <Surface>
+            <Group>
+              {this.props.mountCustomShape && <CustomShape ref="test" />}
+            </Group>
+          </Surface>
+        );
+      }
+    });
+    var container = document.createElement('div');
+    React.render(<Outer />, container);
+    expect(ref).not.toBeDefined();
+    React.render(<Outer mountCustomShape={true} />, container);
+    expect(ref.constructor).toBe(CustomShape);
   });
 
 });

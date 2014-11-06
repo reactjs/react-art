@@ -16,12 +16,9 @@ require('art/modes/fast'); // Flip this to DOM mode for debugging
 var Transform = require('art/core/transform');
 var Mode = require('art/modes/current');
 
-var DOMPropertyOperations = require('react/lib/DOMPropertyOperations');
-var ReactBrowserComponentMixin = require('react/lib/ReactBrowserComponentMixin');
+var React = require('react');
 var ReactComponent = require('react/lib/ReactComponent');
-var ReactMount = require('react/lib/ReactMount');
 var ReactMultiChild = require('react/lib/ReactMultiChild');
-var ReactDOMComponent = require('react/lib/ReactDOMComponent');
 var ReactUpdates = require('react/lib/ReactUpdates');
 
 var assign = require('react/lib/Object.assign');
@@ -169,112 +166,74 @@ var ContainerMixin = assign({}, ReactMultiChild.Mixin, {
 
 });
 
-// Surface - Root node of all ART
+// Surface is a React DOM Component, not an ART component. It serves as the
+// entry point into the ART reconciler.
 
-var Surface = createComponent(
-  'Surface',
-  ReactDOMComponent.Mixin,
-  ReactComponentMixin,
-  ContainerMixin,
-  ReactBrowserComponentMixin, {
+var Surface = React.createClass({
 
-  mountComponent: function(rootID, transaction, mountDepth) {
-    ReactComponentMixin.mountComponent.call(
-      this,
-      rootID,
-      transaction,
-      mountDepth
-    );
-    transaction.getReactMountReady().enqueue(this.componentDidMount, this);
-    // Temporary placeholder
-    var idMarkup = DOMPropertyOperations.createMarkupForID(rootID);
-    return '<div ' + idMarkup + '></div>';
-  },
+  displayName: 'Surface',
 
-  setApprovedDOMProperties: function(nextProps) {
-    // TODO: This is a major hack. Either make ART or React internals fit better
-    var prevProps = this.props;
-
-    var prevPropsSubset = {
-      accesskey: prevProps.accesskey,
-      className: prevProps.className,
-      draggable: prevProps.draggable,
-      role: prevProps.role,
-      style: prevProps.style,
-      tabindex: prevProps.tabindex,
-      title: prevProps.title
-    };
-
-    var nextPropsSubset = {
-      accesskey: nextProps.accesskey,
-      className: nextProps.className,
-      draggable: nextProps.draggable,
-      role: nextProps.role,
-      style: nextProps.style, // TODO: ART's Canvas Mode overrides cursor
-      tabindex: nextProps.tabindex,
-      title: nextProps.title  // TODO: ART's Canvas Mode overrides surface title
-      // TODO: event listeners
-    };
-
-    // We hack the internals of ReactDOMComponent to only update some DOM
-    // properties that won't override anything important that's internal to ART.
-    this.props = nextPropsSubset;
-    this._updateDOMProperties(prevPropsSubset);
-
-    // Reset to normal state
-    this.props = prevProps;
-  },
+  mixins: [ContainerMixin],
 
   componentDidMount: function() {
-    var props = this.props;
+    var domNode = this.getDOMNode();
 
-    this.node = Mode.Surface(+props.width, +props.height);
-    var surfaceElement = this.node.toElement();
-
-    // Replace placeholder hoping that nothing important happened to it
-    var node = this.getDOMNode();
-    if (node.parentNode) {
-      node.parentNode.replaceChild(surfaceElement, node);
-    }
-    ReactMount.setID(surfaceElement, this._rootNodeID);
-
-    this.props = {style:{}};
-    this.setApprovedDOMProperties(props);
+    this.node = Mode.Surface(+this.props.width, +this.props.height, domNode);
 
     var transaction = ReactUpdates.ReactReconcileTransaction.getPooled();
     transaction.perform(
       this.mountAndInjectChildren,
       this,
-      props.children,
+      this.props.children,
+      transaction
+    );
+    ReactUpdates.ReactReconcileTransaction.release(transaction);
+  },
+
+  componentDidUpdate: function(oldProps) {
+    var node = this.node;
+    if (this.props.width != oldProps.width ||
+        this.props.height != oldProps.height) {
+      node.resize(+this.props.width, +this.props.height);
+    }
+
+    var transaction = ReactUpdates.ReactReconcileTransaction.getPooled();
+    transaction.perform(
+      this.updateChildren,
+      this,
+      this.props.children,
       transaction
     );
     ReactUpdates.ReactReconcileTransaction.release(transaction);
 
-    this.props = props;
-  },
-
-  receiveComponent: function(nextComponent, transaction) {
-    var props = nextComponent.props;
-    var node = this.node;
-
-    if (this.props.width != props.width || this.props.height != props.height) {
-      node.resize(+props.width, +props.height);
-    }
-
-    this.setApprovedDOMProperties(props);
-
-    this.updateChildren(props.children, transaction);
-
     if (node.render) {
       node.render();
     }
-
-    this.props = props;
   },
 
-  unmountComponent: function() {
-    ReactComponentMixin.unmountComponent.call(this);
+  componentWillUnmount: function() {
     this.unmountChildren();
+  },
+
+  render: function() {
+    // This is going to be a placeholder because we don't know what it will
+    // actually resolve to because ART may render canvas, vml or svg tags here.
+    // We only allow a subset of properties since others might conflict with
+    // ART's properties.
+    var props = this.props;
+
+    // TODO: ART's Canvas Mode overrides surface title and cursor
+    return (
+      <Mode.Surface.tagName
+        accesskey={props.accesskey}
+        className={props.className}
+        draggable={props.draggable}
+        role={props.role}
+        style={props.style}
+        tabindex={props.tabindex}
+        title={props.title}
+      />
+    );
   }
 
 });
