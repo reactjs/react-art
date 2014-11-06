@@ -18,7 +18,7 @@
     "url": "https://github.com/facebook/react-art.git"
   },
   "dependencies": {
-    "art": "~0.9.0"
+    "art": "^0.10.0"
   },
   "peerDependencies": {
     "react": "^0.13.0-alpha"
