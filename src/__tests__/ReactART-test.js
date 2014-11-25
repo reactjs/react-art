@@ -107,7 +107,8 @@ describe('ReactART', function() {
     var instance = <TestComponent />;
     instance = ReactTestUtils.renderIntoDocument(instance);
     var group = instance.refs.group;
-    expect(group._lifeCycleState).toBe('MOUNTED');
+    // Duck type test for an ART group
+    expect(typeof group.indicate).toBe('function');
   });
 
   it('should render a reasonable SVG structure in SVG mode', function() {
