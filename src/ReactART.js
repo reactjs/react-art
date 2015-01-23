@@ -17,14 +17,11 @@ var Transform = require('art/core/transform');
 var Mode = require('art/modes/current');
 
 var React = require('react');
-var ReactComponent = require('react/lib/ReactComponent');
 var ReactMultiChild = require('react/lib/ReactMultiChild');
 var ReactUpdates = require('react/lib/ReactUpdates');
 
 var assign = require('react/lib/Object.assign');
 var emptyObject = require('react/lib/emptyObject');
-
-var ReactComponentMixin = ReactComponent.Mixin;
 
 var pooledTransform = new Transform();
 
@@ -261,7 +258,11 @@ var EventTypes = {
   onClick: 'click'
 };
 
-var NodeMixin = assign({}, ReactComponentMixin, {
+var NodeMixin = {
+
+  construct: function(element) {
+    this._currentElement = element;
+  },
 
   getPublicInstance: function() {
     return this.node;
@@ -358,7 +359,7 @@ var NodeMixin = assign({}, ReactComponentMixin, {
     );
   }
 
-});
+};
 
 // Group
 
@@ -366,7 +367,6 @@ var Group = createComponent('Group', NodeMixin, ContainerMixin, {
 
   mountComponent: function(rootID, transaction, context) {
     this.node = Mode.Group();
-    ReactComponentMixin.mountComponent.apply(this, arguments);
     var props = this._currentElement.props;
     this.applyGroupProps(emptyObject, props);
     this.mountAndInjectChildren(props.children, transaction, context);
@@ -400,7 +400,6 @@ var ClippingRectangle = createComponent(
 
   mountComponent: function(rootID, transaction, context) {
     this.node = Mode.ClippingRectangle();
-    ReactComponentMixin.mountComponent.apply(this, arguments);
     var props = this._currentElement.props;
     this.applyClippingProps(emptyObject, props);
     this.mountAndInjectChildren(props.children, transaction, context);
@@ -474,13 +473,12 @@ var RenderableMixin = assign({}, NodeMixin, {
 var Shape = createComponent('Shape', RenderableMixin, {
 
   construct: function(element) {
-    ReactComponentMixin.construct.call(this, element);
+    this._currentElement = element;
     this._oldPath = null;
   },
 
   mountComponent: function(rootID, transaction, context) {
     this.node = Mode.Shape();
-    ReactComponentMixin.mountComponent.apply(this, arguments);
     var props = this._currentElement.props;
     this.applyShapeProps(emptyObject, props);
     return this.node;
@@ -516,7 +514,7 @@ var Shape = createComponent('Shape', RenderableMixin, {
 var Text = createComponent('Text', RenderableMixin, {
 
   construct: function(element) {
-    ReactComponentMixin.construct.call(this, element);
+    this._currentElement = element;
     this._oldString = null;
   },
 
@@ -524,7 +522,6 @@ var Text = createComponent('Text', RenderableMixin, {
     var props = this._currentElement.props;
     var newString = childrenAsString(props.children);
     this.node = Mode.Text(newString, props.font, props.alignment, props.path);
-    ReactComponentMixin.mountComponent.apply(this, arguments);
     this._oldString = newString;
     this.applyRenderableProps(emptyObject, props);
     return this.node;
