@@ -237,6 +237,7 @@ var Surface = React.createClass({
         accesskey={props.accesskey}
         className={props.className}
         draggable={props.draggable}
+        id={props.id}
         role={props.role}
         style={props.style}
         tabindex={props.tabindex}
