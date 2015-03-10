@@ -10,12 +10,12 @@
     "canvas",
     "jsx"
   ],
-  "bugs": "https://github.com/facebook/react-art/issues",
+  "bugs": "https://github.com/reactjs/react-art/issues",
   "licenses": "BSD-3-Clause",
   "main": "lib/ReactART.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/facebook/react-art.git"
+    "url": "https://github.com/reactjs/react-art.git"
   },
   "dependencies": {
     "art": "^0.10.0"
