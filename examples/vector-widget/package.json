@@ -5,7 +5,7 @@
     "webpack": "~1.0.0"
   },
   "scripts": {
-    "preinstall": "npm install ../..",
+    "postinstall": "npm install ../..",
     "build": "webpack app.js bundle.js"
   }
 }
