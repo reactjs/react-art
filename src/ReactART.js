@@ -17,6 +17,7 @@ var Transform = require('art/core/transform');
 var Mode = require('art/modes/current');
 
 var React = require('react');
+var ReactInstanceMap = require('react/lib/ReactInstanceMap');
 var ReactMultiChild = require('react/lib/ReactMultiChild');
 var ReactUpdates = require('react/lib/ReactUpdates');
 
@@ -191,10 +192,11 @@ var Surface = React.createClass({
 
     var transaction = ReactUpdates.ReactReconcileTransaction.getPooled();
     transaction.perform(
-      this.mountAndInjectChildrenAtRoot,
+      this.mountAndInjectChildren,
       this,
       this.props.children,
-      transaction
+      transaction,
+      ReactInstanceMap.get(this)._context
     );
     ReactUpdates.ReactReconcileTransaction.release(transaction);
   },
@@ -208,10 +210,11 @@ var Surface = React.createClass({
 
     var transaction = ReactUpdates.ReactReconcileTransaction.getPooled();
     transaction.perform(
-      this.updateChildrenAtRoot,
+      this.updateChildren,
       this,
       this.props.children,
-      transaction
+      transaction,
+      ReactInstanceMap.get(this)._context
     );
     ReactUpdates.ReactReconcileTransaction.release(transaction);
 
