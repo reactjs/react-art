@@ -16,22 +16,12 @@ require('art/modes/dom'); // Flip this to DOM mode for debugging
 var Transform = require('art/core/transform');
 var Mode = require('art/modes/current');
 
-var DOMPropertyOperations = require('react/lib/DOMPropertyOperations');
-var ReactBrowserComponentMixin = require('react/lib/ReactBrowserComponentMixin');
-var ReactComponent = require('react/lib/ReactComponent');
-var ReactElement = require('react/lib/ReactElement');
-var ReactLegacyElement = require('react/lib/ReactLegacyElement');
-var ReactMount = require('react/lib/ReactMount');
+var React = require('react');
 var ReactMultiChild = require('react/lib/ReactMultiChild');
-var ReactDOMComponent = require('react/lib/ReactDOMComponent');
 var ReactUpdates = require('react/lib/ReactUpdates');
 
 var assign = require('react/lib/Object.assign');
-
-var ReactComponentMixin = ReactComponent.Mixin;
-
-// Used for comparison during mounting to avoid a lot of null checks
-var BLANK_PROPS = {};
+var emptyObject = require('react/lib/emptyObject');
 
 var pooledTransform = new Transform();
 
@@ -52,16 +42,19 @@ function childrenAsString(children) {
 
 function createComponent(name) {
   var ReactARTComponent = function(props) {
-    // This constructor and it's argument is currently used by mocks.
+    this.node = null;
+    this.subscriptions = null;
+    this.listeners = null;
+    this._mountImage = null;
+    this._renderedChildren = null;
+    this._mostRecentlyPlacedChild = null;
   };
   ReactARTComponent.displayName = name;
   for (var i = 1, l = arguments.length; i < l; i++) {
     assign(ReactARTComponent.prototype, arguments[i]);
   }
 
-  var ConvenienceConstructor = ReactElement.createFactory(ReactARTComponent);
-
-  return ReactLegacyElement.wrapFactory(ConvenienceConstructor);
+  return ReactARTComponent;
 }
 
 // ContainerMixin for components that can hold ART nodes
@@ -139,6 +132,14 @@ var ContainerMixin = assign({}, ReactMultiChild.Mixin, {
     child._mountImage = null;
   },
 
+  updateChildrenAtRoot: function(nextChildren, transaction) {
+    this.updateChildren(nextChildren, transaction, emptyObject);
+  },
+
+  mountAndInjectChildrenAtRoot: function(children, transaction) {
+    this.mountAndInjectChildren(children, transaction, emptyObject);
+  },
+
   /**
    * Override to bypass batch updating because it is not necessary.
    *
@@ -147,17 +148,18 @@ var ContainerMixin = assign({}, ReactMultiChild.Mixin, {
    * @internal
    * @override {ReactMultiChild.Mixin.updateChildren}
    */
-  updateChildren: function(nextChildren, transaction) {
+  updateChildren: function(nextChildren, transaction, context) {
     this._mostRecentlyPlacedChild = null;
-    this._updateChildren(nextChildren, transaction);
+    this._updateChildren(nextChildren, transaction, context);
   },
 
   // Shorthands
 
-  mountAndInjectChildren: function(children, transaction) {
+  mountAndInjectChildren: function(children, transaction, context) {
     var mountedImages = this.mountChildren(
       children,
-      transaction
+      transaction,
+      context
     );
     // Each mount image corresponds to one of the flattened children
     var i = 0;
@@ -173,112 +175,74 @@ var ContainerMixin = assign({}, ReactMultiChild.Mixin, {
 
 });
 
-// Surface - Root node of all ART
+// Surface is a React DOM Component, not an ART component. It serves as the
+// entry point into the ART reconciler.
 
-var Surface = createComponent(
-  'Surface',
-  ReactDOMComponent.Mixin,
-  ReactComponentMixin,
-  ContainerMixin,
-  ReactBrowserComponentMixin, {
+var Surface = React.createClass({
 
-  mountComponent: function(rootID, transaction, mountDepth) {
-    ReactComponentMixin.mountComponent.call(
-      this,
-      rootID,
-      transaction,
-      mountDepth
-    );
-    transaction.getReactMountReady().enqueue(this.componentDidMount, this);
-    // Temporary placeholder
-    var idMarkup = DOMPropertyOperations.createMarkupForID(rootID);
-    return '<div ' + idMarkup + '></div>';
-  },
+  displayName: 'Surface',
 
-  setApprovedDOMProperties: function(nextProps) {
-    // TODO: This is a major hack. Either make ART or React internals fit better
-    var prevProps = this.props;
-
-    var prevPropsSubset = {
-      accesskey: prevProps.accesskey,
-      className: prevProps.className,
-      draggable: prevProps.draggable,
-      role: prevProps.role,
-      style: prevProps.style,
-      tabindex: prevProps.tabindex,
-      title: prevProps.title
-    };
-
-    var nextPropsSubset = {
-      accesskey: nextProps.accesskey,
-      className: nextProps.className,
-      draggable: nextProps.draggable,
-      role: nextProps.role,
-      style: nextProps.style, // TODO: ART's Canvas Mode overrides cursor
-      tabindex: nextProps.tabindex,
-      title: nextProps.title  // TODO: ART's Canvas Mode overrides surface title
-      // TODO: event listeners
-    };
-
-    // We hack the internals of ReactDOMComponent to only update some DOM
-    // properties that won't override anything important that's internal to ART.
-    this.props = nextPropsSubset;
-    this._updateDOMProperties(prevPropsSubset);
-
-    // Reset to normal state
-    this.props = prevProps;
-  },
+  mixins: [ContainerMixin],
 
   componentDidMount: function() {
-    var props = this.props;
+    var domNode = this.getDOMNode();
 
-    this.node = Mode.Surface(+props.width, +props.height);
-    var surfaceElement = this.node.toElement();
-
-    // Replace placeholder hoping that nothing important happened to it
-    var node = this.getDOMNode();
-    if (node.parentNode) {
-      node.parentNode.replaceChild(surfaceElement, node);
-    }
-    ReactMount.setID(surfaceElement, this._rootNodeID);
-
-    this.props = {style:{}};
-    this.setApprovedDOMProperties(props);
+    this.node = Mode.Surface(+this.props.width, +this.props.height, domNode);
 
     var transaction = ReactUpdates.ReactReconcileTransaction.getPooled();
     transaction.perform(
-      this.mountAndInjectChildren,
+      this.mountAndInjectChildrenAtRoot,
       this,
-      props.children,
+      this.props.children,
+      transaction
+    );
+    ReactUpdates.ReactReconcileTransaction.release(transaction);
+  },
+
+  componentDidUpdate: function(oldProps) {
+    var node = this.node;
+    if (this.props.width != oldProps.width ||
+        this.props.height != oldProps.height) {
+      node.resize(+this.props.width, +this.props.height);
+    }
+
+    var transaction = ReactUpdates.ReactReconcileTransaction.getPooled();
+    transaction.perform(
+      this.updateChildrenAtRoot,
+      this,
+      this.props.children,
       transaction
     );
     ReactUpdates.ReactReconcileTransaction.release(transaction);
 
-    this.props = props;
-  },
-
-  receiveComponent: function(nextComponent, transaction) {
-    var props = nextComponent.props;
-    var node = this.node;
-
-    if (this.props.width != props.width || this.props.height != props.height) {
-      node.resize(+props.width, +props.height);
-    }
-
-    this.setApprovedDOMProperties(props);
-
-    this.updateChildren(props.children, transaction);
-
     if (node.render) {
       node.render();
     }
-
-    this.props = props;
   },
 
-  unmountComponent: function() {
-    ReactComponentMixin.unmountComponent.call(this);
+  componentWillUnmount: function() {
     this.unmountChildren();
+  },
+
+  render: function() {
+    // This is going to be a placeholder because we don't know what it will
+    // actually resolve to because ART may render canvas, vml or svg tags here.
+    // We only allow a subset of properties since others might conflict with
+    // ART's properties.
+    var props = this.props;
+
+    // TODO: ART's Canvas Mode overrides surface title and cursor
+    return (
+      <Mode.Surface.tagName
+        accesskey={props.accesskey}
+        className={props.className}
+        draggable={props.draggable}
+        role={props.role}
+        style={props.style}
+        tabindex={props.tabindex}
+        title={props.title}
+      />
+    );
   }
 
 });
@@ -294,7 +258,15 @@ var EventTypes = {
   onClick: 'click'
 };
 
-var NodeMixin = assign({}, ReactComponentMixin, {
+var NodeMixin = {
+
+  construct: function(element) {
+    this._currentElement = element;
+  },
+
+  getPublicInstance: function() {
+    return this.node;
+  },
 
   putEventListener: function(type, listener) {
     var subscriptions = this.subscriptions || (this.subscriptions = {});
@@ -387,25 +359,26 @@ var NodeMixin = assign({}, ReactComponentMixin, {
     );
   }
 
-});
+};
 
 // Group
 
 var Group = createComponent('Group', NodeMixin, ContainerMixin, {
 
-  mountComponent: function(rootID, transaction, mountDepth) {
-    ReactComponentMixin.mountComponent.apply(this, arguments);
+  mountComponent: function(rootID, transaction, context) {
     this.node = Mode.Group();
-    this.applyGroupProps(BLANK_PROPS, this.props);
-    this.mountAndInjectChildren(this.props.children, transaction);
+    var props = this._currentElement.props;
+    this.applyGroupProps(emptyObject, props);
+    this.mountAndInjectChildren(props.children, transaction, context);
     return this.node;
   },
 
-  receiveComponent: function(nextComponent, transaction) {
+  receiveComponent: function(nextComponent, transaction, context) {
     var props = nextComponent.props;
-    this.applyGroupProps(this.props, props);
-    this.updateChildren(props.children, transaction);
-    this.props = props;
+    var oldProps = this._currentElement.props;
+    this.applyGroupProps(oldProps, props);
+    this.updateChildren(props.children, transaction, context);
+    this._currentElement = nextComponent;
   },
 
   applyGroupProps: function(oldProps, props) {
@@ -425,19 +398,20 @@ var Group = createComponent('Group', NodeMixin, ContainerMixin, {
 var ClippingRectangle = createComponent(
     'ClippingRectangle', NodeMixin, ContainerMixin, {
 
-  mountComponent: function(rootID, transaction, mountDepth) {
-    ReactComponentMixin.mountComponent.apply(this, arguments);
+  mountComponent: function(rootID, transaction, context) {
     this.node = Mode.ClippingRectangle();
-    this.applyClippingProps(BLANK_PROPS, this.props);
-    this.mountAndInjectChildren(this.props.children, transaction);
+    var props = this._currentElement.props;
+    this.applyClippingProps(emptyObject, props);
+    this.mountAndInjectChildren(props.children, transaction, context);
     return this.node;
   },
 
-  receiveComponent: function(nextComponent, transaction) {
+  receiveComponent: function(nextComponent, transaction, context) {
     var props = nextComponent.props;
-    this.applyClippingProps(this.props, props);
-    this.updateChildren(props.children, transaction);
-    this.props = props;
+    var oldProps = this._currentElement.props;
+    this.applyClippingProps(oldProps, props);
+    this.updateChildren(props.children, transaction, context);
+    this._currentElement = nextComponent;
   },
 
   applyClippingProps: function(oldProps, props) {
@@ -498,17 +472,23 @@ var RenderableMixin = assign({}, NodeMixin, {
 
 var Shape = createComponent('Shape', RenderableMixin, {
 
-  mountComponent: function() {
-    ReactComponentMixin.mountComponent.apply(this, arguments);
+  construct: function(element) {
+    this._currentElement = element;
+    this._oldPath = null;
+  },
+
+  mountComponent: function(rootID, transaction, context) {
     this.node = Mode.Shape();
-    this.applyShapeProps(BLANK_PROPS, this.props);
+    var props = this._currentElement.props;
+    this.applyShapeProps(emptyObject, props);
     return this.node;
   },
 
-  receiveComponent: function(nextComponent, transaction) {
+  receiveComponent: function(nextComponent, transaction, context) {
     var props = nextComponent.props;
-    this.applyShapeProps(this.props, props);
-    this.props = props;
+    var oldProps = this._currentElement.props;
+    this.applyShapeProps(oldProps, props);
+    this._currentElement = nextComponent;
   },
 
   applyShapeProps: function(oldProps, props) {
@@ -533,13 +513,17 @@ var Shape = createComponent('Shape', RenderableMixin, {
 
 var Text = createComponent('Text', RenderableMixin, {
 
-  mountComponent: function() {
-    ReactComponentMixin.mountComponent.apply(this, arguments);
-    var props = this.props;
+  construct: function(element) {
+    this._currentElement = element;
+    this._oldString = null;
+  },
+
+  mountComponent: function(rootID, transaction, context) {
+    var props = this._currentElement.props;
     var newString = childrenAsString(props.children);
     this.node = Mode.Text(newString, props.font, props.alignment, props.path);
     this._oldString = newString;
-    this.applyRenderableProps(BLANK_PROPS, this.props);
+    this.applyRenderableProps(emptyObject, props);
     return this.node;
   },
 
@@ -559,9 +543,9 @@ var Text = createComponent('Text', RenderableMixin, {
     );
   },
 
-  receiveComponent: function(nextComponent, transaction) {
+  receiveComponent: function(nextComponent, transaction, context) {
     var props = nextComponent.props;
-    var oldProps = this.props;
+    var oldProps = this._currentElement.props;
 
     var oldString = this._oldString;
     var newString = childrenAsString(props.children);
@@ -580,7 +564,7 @@ var Text = createComponent('Text', RenderableMixin, {
     }
 
     this.applyRenderableProps(oldProps, props);
-    this.props = props;
+    this._currentElement = nextComponent;
   }
 
 });
