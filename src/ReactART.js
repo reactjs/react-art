@@ -15,6 +15,7 @@ require('art/modes/fast'); // Flip this to DOM mode for debugging
 
 var Transform = require('art/core/transform');
 var Mode = require('art/modes/current');
+var MetricsPath = require('art/metics/path');
 
 var React = require('react');
 var ReactInstanceMap = require('react/lib/ReactInstanceMap');
@@ -604,6 +605,7 @@ var ReactART = {
   Pattern: Pattern,
   Transform: Transform,
   Path: Mode.Path,
+  MetricsPath: MetricsPath,
   Surface: Surface,
   Group: Group,
   ClippingRectangle: ClippingRectangle,
