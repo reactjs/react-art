@@ -1,11 +1,11 @@
 {
   "devDependencies": {
     "jsx-loader": "~0.12.0",
-    "react": "^0.13.0-beta.1",
+    "react": "^0.13.0",
     "webpack": "~1.0.0"
   },
   "scripts": {
-    "preinstall": "npm install ../..",
+    "postinstall": "npm install ../..",
     "build": "webpack app.js bundle.js"
   }
 }
