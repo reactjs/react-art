@@ -30,8 +30,7 @@
     "gulp-shell": "^0.3.0",
     "jest-cli": "^0.2.1",
     "react": "^0.13.0",
-    "react-tools": "^0.13.0",
-    "webpack": "^1.5.3"
+    "react-tools": "^0.13.0"
   },
   "scripts": {
     "prepublish": "./node_modules/.bin/gulp",
