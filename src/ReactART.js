@@ -22,7 +22,7 @@ var ReactMultiChild = require('react/lib/ReactMultiChild');
 var ReactUpdates = require('react/lib/ReactUpdates');
 
 var assign = require('react/lib/Object.assign');
-var emptyObject = require('react/lib/emptyObject');
+var emptyObject = require('fbjs/lib/emptyObject');
 
 var pooledTransform = new Transform();
 
