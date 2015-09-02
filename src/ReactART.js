@@ -186,9 +186,8 @@ var Surface = React.createClass({
   mixins: [ContainerMixin],
 
   componentDidMount: function() {
-    var domNode = this.getDOMNode();
 
-    this.node = Mode.Surface(+this.props.width, +this.props.height, domNode);
+    this.node = Mode.Surface(+this.props.width, +this.props.height, this.domNode);
 
     var transaction = ReactUpdates.ReactReconcileTransaction.getPooled();
     transaction.perform(
@@ -237,6 +236,7 @@ var Surface = React.createClass({
     // TODO: ART's Canvas Mode overrides surface title and cursor
     return (
       <Mode.Surface.tagName
+        ref={c => this.domNode = c}
         accesskey={props.accesskey}
         className={props.className}
         draggable={props.draggable}

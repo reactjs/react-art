@@ -31,6 +31,7 @@
     "gulp-shell": "^0.3.0",
     "jest-cli": "^0.2.1",
     "react": "^0.14.0-a",
+    "react-dom": "^0.14.0-a",
     "react-tools": "^0.13.0"
   },
   "scripts": {
