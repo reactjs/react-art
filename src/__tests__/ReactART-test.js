@@ -13,8 +13,7 @@
 
 "use strict";
 
-require('mock-modules')
-  .dontMock('ReactART');
+jest.dontMock('ReactART');
 
 var React;
 var ReactTestUtils;
@@ -55,10 +54,7 @@ describe('ReactART', function() {
     ReactDOM = require('react-dom');
 
     var ReactART = require('ReactART');
-    var ARTSVGMode = require('art/modes/svg');
-    var ARTCurrentMode = require('art/modes/current');
-
-    ARTCurrentMode.setCurrent(ARTSVGMode);
+    ReactART.mode('svg');
 
     Group = ReactART.Group;
     Shape = ReactART.Shape;
@@ -118,23 +114,23 @@ describe('ReactART', function() {
     instance = ReactTestUtils.renderIntoDocument(instance);
 
     var expectedStructure = {
-      nodeName: 'SVG',
+      nodeName: 'svg',
       width: '150',
       height: '200',
       children: [
-        { nodeName: 'DEFS' },
+        { nodeName: 'defs' },
         {
-          nodeName: 'G',
+          nodeName: 'g',
           children: [
             {
-              nodeName: 'DEFS',
+              nodeName: 'defs',
               children: [
-                { nodeName: 'LINEARGRADIENT' }
+                { nodeName: 'linearGradient' }
               ]
             },
-            { nodeName: 'PATH' },
-            { nodeName: 'PATH' },
-            { nodeName: 'G' }
+            { nodeName: 'path' },
+            { nodeName: 'path' },
+            { nodeName: 'g' }
           ]
         }
       ]
@@ -149,16 +145,16 @@ describe('ReactART', function() {
     var instance = ReactDOM.render(<TestComponent flipped={false} />, container);
 
     var expectedStructure = {
-      nodeName: 'SVG',
+      nodeName: 'svg',
       children: [
-        { nodeName: 'DEFS' },
+        { nodeName: 'defs' },
         {
-          nodeName: 'G',
+          nodeName: 'g',
           children: [
-            { nodeName: 'DEFS' },
-            { nodeName: 'PATH', opacity: '0.1' },
-            { nodeName: 'PATH', opacity: Missing },
-            { nodeName: 'G' }
+            { nodeName: 'defs' },
+            { nodeName: 'path', opacity: '0.1' },
+            { nodeName: 'path', opacity: Missing },
+            { nodeName: 'g' }
           ]
         }
       ]
@@ -170,16 +166,16 @@ describe('ReactART', function() {
     ReactDOM.render(<TestComponent flipped={true} />, container);
 
     var expectedNewStructure = {
-      nodeName: 'SVG',
+      nodeName: 'svg',
       children: [
-        { nodeName: 'DEFS' },
+        { nodeName: 'defs' },
         {
-          nodeName: 'G',
+          nodeName: 'g',
           children: [
-            { nodeName: 'DEFS' },
-            { nodeName: 'PATH', opacity: Missing },
-            { nodeName: 'PATH', opacity: '0.1' },
-            { nodeName: 'G' }
+            { nodeName: 'defs' },
+            { nodeName: 'path', opacity: Missing },
+            { nodeName: 'path', opacity: '0.1' },
+            { nodeName: 'g' }
           ]
         }
       ]
@@ -208,7 +204,7 @@ describe('ReactART', function() {
     expect(mounted).toBe(true);
   });
 
-  it('resolves refs before componentDidMount', function() {
+  it('resolves refs bef ore componentDidMount', function() {
     var CustomShape = React.createClass({
       render: function() {
         return <Shape />;
