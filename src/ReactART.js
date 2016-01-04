@@ -11,10 +11,13 @@
 
 "use strict";
 
-require('art/modes/fast'); // Flip this to DOM mode for debugging
+var defaultMode = 'fast';
 
+// set by ReactART.mode() or Surface.componentWillMount
+var Mode;
 var Transform = require('art/core/transform');
-var Mode = require('art/modes/current');
+
+// var ReplayPath = require('./util/ReplayPath');
 
 var React = require('react');
 var ReactInstanceMap = require('react/lib/ReactInstanceMap');
@@ -24,7 +27,18 @@ var ReactUpdates = require('react/lib/ReactUpdates');
 var assign = require('react/lib/Object.assign');
 var emptyObject = require('fbjs/lib/emptyObject');
 
-var pooledTransform = new Transform();
+var pooledTransform;
+
+function setMode(mode) {
+  var mode = require('art/modes/'+mode);
+
+  Mode = require('art/modes/current');
+  // canvas mode does not explicitly set itself like the other modes
+  Mode.setCurrent(mode);
+
+  pooledTransform = new Transform();
+}
+
 
 // Utilities
 
@@ -184,6 +198,12 @@ var Surface = React.createClass({
   displayName: 'Surface',
 
   mixins: [ContainerMixin],
+
+  componentWillMount: function() {
+    if (!Mode){
+      setMode(defaultMode);
+    }
+  },
 
   componentDidMount: function() {
 
@@ -597,19 +617,25 @@ Pattern.prototype.applyFill = function(node) {
   node.fillImage.apply(node, this.args);
 };
 
-var ReactART = {
+function pathFactory(){ 
+  if(!Mode){ 
+    throw Error('Mode not set. Call ReactART.mode() before using Path');
+  } 
+  return Mode.Path(); 
+}
 
+var ReactART = {
+  mode: setMode,
   LinearGradient: LinearGradient,
   RadialGradient: RadialGradient,
   Pattern: Pattern,
   Transform: Transform,
-  Path: Mode.Path,
+  Path: pathFactory,
   Surface: Surface,
   Group: Group,
   ClippingRectangle: ClippingRectangle,
   Shape: Shape,
   Text: Text
-
 };
 
 module.exports = ReactART;
