@@ -18,7 +18,7 @@
     "url": "https://github.com/reactjs/react-art.git"
   },
   "dependencies": {
-    "art": "^0.10.0",
+    "art": "^0.10.1",
     "fbjs": "^0.2.0"
   },
   "peerDependencies": {
