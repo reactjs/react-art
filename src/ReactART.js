@@ -18,14 +18,14 @@ require('art/modes/current').setCurrent(
 var Transform = require('art/core/transform');
 var Mode = require('art/modes/current');
 
-var React = require('react');
-var ReactDOM = require('react-dom');
-var ReactInstanceMap = require('react/lib/ReactInstanceMap');
-var ReactMultiChild = require('react/lib/ReactMultiChild');
-var ReactUpdates = require('react/lib/ReactUpdates');
+var React = require('React');
+var ReactDOM = require('ReactDOM');
+var ReactInstanceMap = require('ReactInstanceMap');
+var ReactMultiChild = require('ReactMultiChild');
+var ReactUpdates = require('ReactUpdates');
 
-var assign = require('react/lib/Object.assign');
-var emptyObject = require('fbjs/lib/emptyObject');
+var assign = require('Object.assign');
+var emptyObject = require('emptyObject');
 
 var pooledTransform = new Transform();
 

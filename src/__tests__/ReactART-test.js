@@ -16,9 +16,9 @@
 jest
   .dontMock('ReactART');
 
-var React = require('react');
-var ReactDOM = require('react-dom');
-var ReactTestUtils = require('react-addons-test-utils');
+var React = require('React');
+var ReactDOM = require('ReactDOM');
+var ReactTestUtils = require('ReactTestUtils');
 
 var Group;
 var Shape;
