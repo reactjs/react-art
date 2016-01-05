@@ -9,14 +9,17 @@
  * @providesModule ReactART
  */
 
-"use strict";
+'use strict';
 
-require('art/modes/fast'); // Flip this to DOM mode for debugging
+require('art/modes/current').setCurrent(
+  require('art/modes/fast-noSideEffects') // Flip this to DOM mode for debugging
+);
 
 var Transform = require('art/core/transform');
 var Mode = require('art/modes/current');
 
 var React = require('react');
+var ReactDOM = require('react-dom');
 var ReactInstanceMap = require('react/lib/ReactInstanceMap');
 var ReactMultiChild = require('react/lib/ReactMultiChild');
 var ReactUpdates = require('react/lib/ReactUpdates');
@@ -186,8 +189,9 @@ var Surface = React.createClass({
   mixins: [ContainerMixin],
 
   componentDidMount: function() {
+    var domNode = ReactDOM.findDOMNode(this);
 
-    this.node = Mode.Surface(+this.props.width, +this.props.height, this.domNode);
+    this.node = Mode.Surface(+this.props.width, +this.props.height, domNode);
 
     var transaction = ReactUpdates.ReactReconcileTransaction.getPooled();
     transaction.perform(
@@ -234,9 +238,9 @@ var Surface = React.createClass({
     var props = this.props;
 
     // TODO: ART's Canvas Mode overrides surface title and cursor
+    var Tag = Mode.Surface.tagName;
     return (
-      <Mode.Surface.tagName
-        ref={c => this.domNode = c}
+      <Tag
         accesskey={props.accesskey}
         className={props.className}
         draggable={props.draggable}
@@ -265,6 +269,9 @@ var NodeMixin = {
 
   construct: function(element) {
     this._currentElement = element;
+  },
+
+  getNativeNode: function() {
   },
 
   getPublicInstance: function() {
@@ -368,7 +375,12 @@ var NodeMixin = {
 
 var Group = createComponent('Group', NodeMixin, ContainerMixin, {
 
-  mountComponent: function(rootID, transaction, context) {
+  mountComponent: function(
+    transaction,
+    nativeParent,
+    nativeContainerInfo,
+    context
+  ) {
     this.node = Mode.Group();
     var props = this._currentElement.props;
     this.applyGroupProps(emptyObject, props);
@@ -401,7 +413,12 @@ var Group = createComponent('Group', NodeMixin, ContainerMixin, {
 var ClippingRectangle = createComponent(
     'ClippingRectangle', NodeMixin, ContainerMixin, {
 
-  mountComponent: function(rootID, transaction, context) {
+  mountComponent: function(
+    transaction,
+    nativeParent,
+    nativeContainerInfo,
+    context
+  ) {
     this.node = Mode.ClippingRectangle();
     var props = this._currentElement.props;
     this.applyClippingProps(emptyObject, props);
@@ -477,10 +494,16 @@ var Shape = createComponent('Shape', RenderableMixin, {
 
   construct: function(element) {
     this._currentElement = element;
+    this._oldDelta = null;
     this._oldPath = null;
   },
 
-  mountComponent: function(rootID, transaction, context) {
+  mountComponent: function(
+    transaction,
+    nativeParent,
+    nativeContainerInfo,
+    context
+  ) {
     this.node = Mode.Shape();
     var props = this._currentElement.props;
     this.applyShapeProps(emptyObject, props);
@@ -495,18 +518,25 @@ var Shape = createComponent('Shape', RenderableMixin, {
   },
 
   applyShapeProps: function(oldProps, props) {
+    var oldDelta = this._oldDelta;
     var oldPath = this._oldPath;
     var path = props.d || childrenAsString(props.children);
-    if (path !== oldPath ||
+
+    if (path.delta !== oldDelta ||
+        path !== oldPath ||
         oldProps.width !== props.width ||
         oldProps.height !== props.height) {
+
       this.node.draw(
         path,
         props.width,
         props.height
       );
+
       this._oldPath = path;
+      this._oldDelta = path.delta;
     }
+
     this.applyRenderableProps(oldProps, props);
   }
 
@@ -521,7 +551,12 @@ var Text = createComponent('Text', RenderableMixin, {
     this._oldString = null;
   },
 
-  mountComponent: function(rootID, transaction, context) {
+  mountComponent: function(
+    transaction,
+    nativeParent,
+    nativeContainerInfo,
+    context
+  ) {
     var props = this._currentElement.props;
     var newString = childrenAsString(props.children);
     this.node = Mode.Text(newString, props.font, props.alignment, props.path);
@@ -578,38 +613,37 @@ var slice = Array.prototype.slice;
 
 function LinearGradient(stops, x1, y1, x2, y2) {
   this.args = slice.call(arguments);
-};
+}
+
 LinearGradient.prototype.applyFill = function(node) {
   node.fillLinear.apply(node, this.args);
 };
 
 function RadialGradient(stops, fx, fy, rx, ry, cx, cy) {
   this.args = slice.call(arguments);
-};
+}
+
 RadialGradient.prototype.applyFill = function(node) {
   node.fillRadial.apply(node, this.args);
 };
 
 function Pattern(url, width, height, left, top) {
   this.args = slice.call(arguments);
-};
+}
+
 Pattern.prototype.applyFill = function(node) {
   node.fillImage.apply(node, this.args);
 };
 
-var ReactART = {
-
-  LinearGradient: LinearGradient,
-  RadialGradient: RadialGradient,
-  Pattern: Pattern,
-  Transform: Transform,
+module.exports = {
+  ClippingRectangle,
+  Group,
+  LinearGradient,
   Path: Mode.Path,
-  Surface: Surface,
-  Group: Group,
-  ClippingRectangle: ClippingRectangle,
-  Shape: Shape,
-  Text: Text
-
+  Pattern,
+  RadialGradient,
+  Shape,
+  Surface,
+  Text,
+  Transform,
 };
-
-module.exports = ReactART;
