@@ -98,10 +98,11 @@ var ContainerMixin = assign({}, ReactMultiChild.Mixin, {
    * Creates a child component.
    *
    * @param {ReactComponent} child Component to create.
+   * @param {object} afterNode
    * @param {object} childNode ART node to insert.
    * @protected
    */
-  createChild: function(child, childNode) {
+  createChild: function(child, afterNode, childNode) {
     child._mountImage = childNode;
     var mostRecentlyPlacedChild = this._mostRecentlyPlacedChild;
     if (mostRecentlyPlacedChild == null) {
