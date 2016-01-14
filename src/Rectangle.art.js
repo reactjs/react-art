@@ -29,7 +29,7 @@
 var React = require('react');
 var ReactART = require('./ReactART');
 
-var Props = React.PropTypes;
+var {PropTypes} = React;
 var Shape = ReactART.Shape;
 var Path = ReactART.Path;
 
@@ -38,15 +38,14 @@ var Path = ReactART.Path;
  * components, it must be used in a <Surface>.
  */
 var Rectangle = React.createClass({
-
   propTypes: {
-    width: Props.number.isRequired,
-    height: Props.number.isRequired,
-    radius: Props.number,
-    radiusTopLeft: Props.number,
-    radiusTopRight: Props.number,
-    radiusBottomRight: Props.number,
-    radiusBottomLeft: Props.number
+    width: PropTypes.number.isRequired,
+    height: PropTypes.number.isRequired,
+    radius: PropTypes.number,
+    radiusTopLeft: PropTypes.number,
+    radiusTopRight: PropTypes.number,
+    radiusBottomRight: PropTypes.number,
+    radiusBottomLeft: PropTypes.number,
   },
 
   render: function() {

@@ -18,7 +18,7 @@
     "url": "https://github.com/reactjs/react-art.git"
   },
   "dependencies": {
-    "art": "^0.10.0",
+    "art": "^0.10.1",
     "fbjs": "^0.2.0"
   },
   "peerDependencies": {
@@ -30,16 +30,14 @@
     "gulp": "^3.8.10",
     "gulp-react": "^2.0.0",
     "gulp-shell": "^0.3.0",
-    "jest-cli": "^0.2.1",
-    "react": "^0.14.0-a",
-    "react-dom": "^0.14.0-a"
+    "jest-cli": "^0.8.2",
+    "react": "http://react.zpao.com/builds/master/latest/react.tgz",
+    "react-addons-test-utils": "^0.14.5",
+    "react-dom": "http://react.zpao.com/builds/master/latest/react-dom.tgz"
   },
   "scripts": {
     "prepublish": "gulp",
     "test": "jest"
-  },
-  "engines": {
-    "node": ">=0.10.0"
   },
   "jest": {
     "rootDir": "src",

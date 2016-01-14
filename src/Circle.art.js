@@ -22,18 +22,17 @@
 var React = require('react');
 var ReactART = require('./ReactART');
 
-var Props = React.PropTypes;
-var Shape = ReactART.Shape;
+var {PropTypes} = React;
 var Path = ReactART.Path;
+var Shape = ReactART.Shape;
 
 /**
  * Circle is a React component for drawing circles. Like other ReactART
  * components, it must be used in a <Surface>.
  */
 var Circle = React.createClass({
-
   propTypes: {
-    radius: Props.number.isRequired
+    radius: PropTypes.number.isRequired,
   },
 
   render: function() {
@@ -44,8 +43,7 @@ var Circle = React.createClass({
         .arc(0, radius * -2, radius)
         .close();
     return <Shape {...this.props} d={path} />;
-  }
-
+  },
 });
 
 module.exports = Circle;

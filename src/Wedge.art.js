@@ -25,7 +25,7 @@
 var React = require('react');
 var ReactART = require('./ReactART');
 
-var Props = React.PropTypes;
+var {PropTypes} = React;
 var Shape = ReactART.Shape;
 var Path = ReactART.Path;
 
@@ -36,10 +36,10 @@ var Path = ReactART.Path;
 var Wedge = React.createClass({
 
   propTypes: {
-    outerRadius: Props.number.isRequired,
-    startAngle: Props.number.isRequired,
-    endAngle: Props.number.isRequired,
-    innerRadius: Props.number
+    outerRadius: PropTypes.number.isRequired,
+    startAngle: PropTypes.number.isRequired,
+    endAngle: PropTypes.number.isRequired,
+    innerRadius: PropTypes.number
   },
 
   circleRadians: Math.PI * 2,
