@@ -45,12 +45,13 @@ function childrenAsString(children) {
 }
 
 function createComponent(name) {
-  var ReactARTComponent = function(props) {
+  var ReactARTComponent = function(element) {
     this.node = null;
     this.subscriptions = null;
     this.listeners = null;
     this._mountImage = null;
     this._renderedChildren = null;
+    this.construct(element);
   };
   ReactARTComponent.displayName = name;
   for (var i = 1, l = arguments.length; i < l; i++) {
