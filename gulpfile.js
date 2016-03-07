@@ -1,17 +1,32 @@
+var babel = require('gulp-babel');
 var gulp = require('gulp');
-var gReact = require('gulp-react');
 var del = require('del');
+var runSequence = require('run-sequence');
 var shell = require('gulp-shell');
 
-gulp.task('clean', function(cb) {
-  del(['lib/', 'Flux.js'], cb);
+var babelOptions = require('./scripts/babel/options');
+
+var paths = {
+  src: [
+    'src/**/*.js',
+    '!src/**/__tests__/**/*.js',
+  ],
+  lib: 'lib',
+};
+
+gulp.task('clean', function() {
+  return del([paths.lib]);
 });
 
-gulp.task('default', ['clean'], function() {
-  return gulp.src('src/*.js')
-             .pipe(gReact({harmony: true}))
-             .pipe(gulp.dest('lib'));
+gulp.task('lib', function() {
+  return gulp
+    .src(paths.src)
+    .pipe(babel(babelOptions))
+    .pipe(gulp.dest(paths.lib));
+});
 
+gulp.task('default', function(cb) {
+  runSequence('clean', 'lib', cb);
 });
 
 gulp.task('build-examples-website', ['clean'], shell.task([[

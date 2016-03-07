@@ -19,30 +19,40 @@
   },
   "dependencies": {
     "art": "^0.10.1",
-    "fbjs": "^0.2.0"
+    "fbjs": "^0.6.0"
   },
   "peerDependencies": {
     "react": "^0.13.0 || ^0.14.0-a"
   },
   "devDependencies": {
     "babel-jest": "^5.3.0",
-    "del": "^0.1.3",
+    "del": "^2.2.0",
+    "fbjs-scripts": "^0.5.0",
     "gulp": "^3.8.10",
-    "gulp-react": "^2.0.0",
+    "gulp-babel": "^5.3.0",
     "gulp-shell": "^0.3.0",
     "jest-cli": "^0.8.2",
     "react": "http://react.zpao.com/builds/master/latest/react.tgz",
     "react-addons-test-utils": "^0.14.5",
-    "react-dom": "http://react.zpao.com/builds/master/latest/react-dom.tgz"
+    "react-dom": "http://react.zpao.com/builds/master/latest/react-dom.tgz",
+    "run-sequence": "^1.1.5"
   },
   "scripts": {
     "prepublish": "gulp",
-    "test": "jest"
+    "test": "NODE_ENV=test jest"
   },
   "jest": {
-    "rootDir": "src",
-    "scriptPreprocessor": "../node_modules/babel-jest",
-    "setupEnvScriptFile": "../jest/environment.js",
+    "modulePathIgnorePatterns": [
+      "<rootDir>/lib"
+    ],
+    "rootDir": ".",
+    "scriptPreprocessor": "<rootDir>/scripts/jest/preprocessor.js",
+    "setupEnvScriptFile": "<rootDir>/scripts/jest/environment.js",
+    "testRunner": "node_modules/jest-cli/src/testRunners/jasmine/jasmine2.js",
+    "testPathDirs": [
+       "<rootDir>/src",
+       "node_modules/"
+     ],
     "unmockedModulePathPatterns": [
       ""
     ]
