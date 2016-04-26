@@ -19,7 +19,8 @@
   },
   "dependencies": {
     "art": "^0.10.1",
-    "fbjs": "^0.2.0"
+    "fbjs": "^0.2.0",
+    "object-assign": "^4.0.1"
   },
   "peerDependencies": {
     "react": "^0.13.0 || ^0.14.0-a"
