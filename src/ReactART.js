@@ -25,6 +25,7 @@ const ReactMultiChild = require('react/lib/ReactMultiChild');
 const ReactUpdates = require('react/lib/ReactUpdates');
 
 const emptyObject = require('fbjs/lib/emptyObject');
+const invariant = require('fbjs/lib/invariant');
 
 const assign = require('object-assign');
 const pooledTransform = new Transform();
@@ -61,10 +62,15 @@ function createComponent(name) {
   return ReactARTComponent;
 }
 
-// ContainerMixin for components that can hold ART nodes
-
+/**
+ * Insert `node` into `parentNode` after `referenceNode`.
+ */
 function injectAfter(parentNode, referenceNode, node) {
   let beforeNode;
+  if (node.parentNode === parentNode &&
+      node.previousSibling === referenceNode) {
+    return;
+  }
   if (referenceNode == null) {
     // node is supposed to be first.
     beforeNode = parentNode.firstChild;
@@ -72,12 +78,20 @@ function injectAfter(parentNode, referenceNode, node) {
     // node is supposed to be after referenceNode.
     beforeNode = referenceNode.nextSibling;
   }
-  if (beforeNode) {
+  if (beforeNode && beforeNode.previousSibling !== node) {
+    // Cases where `node === beforeNode` should get filtered out by earlier
+    // checks and the behavior isn't well-defined.
+    invariant(
+      node !== beforeNode,
+      'ReactART: Can not insert node before itself'
+    );
     node.injectBefore(beforeNode);
-  } else {
+  } else if (node.parentNode !== parentNode) {
     node.inject(parentNode);
   }
 }
+
+// ContainerMixin for components that can hold ART nodes
 
 const ContainerMixin = assign({}, ReactMultiChild.Mixin, {
 
