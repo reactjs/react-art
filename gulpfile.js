@@ -1,15 +1,15 @@
 var gulp = require('gulp');
-var gReact = require('gulp-react');
+var babel = require('gulp-babel');
 var del = require('del');
 var shell = require('gulp-shell');
 
-gulp.task('clean', function(cb) {
-  del(['lib/', 'Flux.js'], cb);
+gulp.task('clean', function() {
+  return del(['lib/', 'Flux.js']);
 });
 
 gulp.task('default', ['clean'], function() {
   return gulp.src('src/*.js')
-             .pipe(gReact({harmony: true}))
+             .pipe(babel())
              .pipe(gulp.dest('lib'));
 
 });
