@@ -5,7 +5,14 @@ module.exports = {
   entry: './app.js',
   module: {
     loaders: [
-      { test: /\.js$/, loader: 'jsx-loader' }
+      {
+        loader: 'babel',
+        test: /\.js$/,
+        exclude: /node_modules/,
+        query: {
+          presets: ['es2015', 'react'],
+        },
+      }
     ]
   },
   plugins: [
