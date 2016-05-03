@@ -1,5 +1,5 @@
 /**
- * Copyright 2013-2014 Facebook, Inc.
+ * Copyright (c) 2013-present Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
@@ -14,7 +14,7 @@
 'use strict';
 
 jest
-  .dontMock('ReactART');
+  .unmock('ReactART');
 
 var React = require('react');
 var ReactDOM = require('react-dom');
@@ -204,7 +204,7 @@ describe('ReactART', function() {
     var realNode = ReactDOM.findDOMNode(instance);
     expect(realNode.textContent).toBe(before);
 
-    var instance = ReactDOM.render(<Component chars={after} />, container);
+    instance = ReactDOM.render(<Component chars={after} />, container);
     expect(realNode.textContent).toBe(after);
 
     ReactDOM.unmountComponentAtNode(container);
