@@ -20,6 +20,7 @@ var React = require('react');
 var ReactDOM = require('react-dom');
 var ReactTestUtils = require('react-addons-test-utils');
 
+var ClippingRectangle;
 var Group;
 var Shape;
 var Surface;
@@ -56,6 +57,7 @@ describe('ReactART', function() {
   beforeEach(function() {
     ARTCurrentMode.setCurrent(ARTSVGMode);
 
+    ClippingRectangle = ReactART.ClippingRectangle;
     Group = ReactART.Group;
     Shape = ReactART.Shape;
     Surface = ReactART.Surface;
@@ -284,6 +286,48 @@ describe('ReactART', function() {
     expect(ref).not.toBeDefined();
     ReactDOM.render(<Outer mountCustomShape={true} />, container);
     expect(ref.constructor).toBe(CustomShape);
+  });
+
+  it('propagates context down through groups', function() {
+    var contextValue;
+    var innerExpects = 0;
+    var CustomShape = React.createClass({
+      contextTypes: {
+        value: React.PropTypes.number
+      },
+      render: function() {
+        expect(this.context.value).toBe(contextValue);
+        innerExpects++;
+        return <Shape />;
+      },
+    });
+    var Container = React.createClass({
+      childContextTypes: {
+        value: React.PropTypes.number
+      },
+      getChildContext: function() {
+        return {value: this.props.contextValue};
+      },
+      render: function() {
+        return (
+          <Surface>
+            <Group>
+              <ClippingRectangle>
+                <CustomShape />
+                {this.props.contextValue === 2 && <CustomShape />}
+              </ClippingRectangle>
+            </Group>
+          </Surface>
+        );
+      },
+    });
+
+    var container = document.createElement('div');
+    contextValue = 1;
+    ReactDOM.render(<Container contextValue={contextValue} />, container);
+    contextValue = 2;
+    ReactDOM.render(<Container contextValue={contextValue} />, container);
+    expect(innerExpects).toBe(3);
   });
 
 });
