@@ -3,10 +3,8 @@
 To try this example, run:
 
 ```
-npm install
-npm run build
+$ npm install
+$ npm start
 ```
 
-in this directory, then open index.html in your browser.
-
-**Note:** If you have any issues, ensure that you ran `npm install` from the root of the `react-art` project first.
+in this directory, then open [http://localhost:3000](http://localhost:3000) it your browser.
