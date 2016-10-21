@@ -20,9 +20,9 @@ const Mode = require('art/modes/current');
 
 const React = require('react');
 const ReactDOM = require('react-dom');
-const ReactInstanceMap = require('react/lib/ReactInstanceMap');
-const ReactMultiChild = require('react/lib/ReactMultiChild');
-const ReactUpdates = require('react/lib/ReactUpdates');
+const ReactInstanceMap = require('react-dom/lib/ReactInstanceMap');
+const ReactMultiChild = require('react-dom/lib/ReactMultiChild');
+const ReactUpdates = require('react-dom/lib/ReactUpdates');
 
 const emptyObject = require('fbjs/lib/emptyObject');
 const invariant = require('fbjs/lib/invariant');
