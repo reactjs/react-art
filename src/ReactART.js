@@ -20,9 +20,9 @@ const Mode = require('art/modes/current');
 
 const React = require('react');
 const ReactDOM = require('react-dom');
-const ReactInstanceMap = require('react/lib/ReactInstanceMap');
-const ReactMultiChild = require('react/lib/ReactMultiChild');
-const ReactUpdates = require('react/lib/ReactUpdates');
+const ReactInstanceMap = require('react-dom/lib/ReactInstanceMap');
+const ReactMultiChild = require('react-dom/lib/ReactMultiChild');
+const ReactUpdates = require('react-dom/lib/ReactUpdates');
 
 const emptyObject = require('fbjs/lib/emptyObject');
 const invariant = require('fbjs/lib/invariant');
@@ -93,7 +93,7 @@ function injectAfter(parentNode, referenceNode, node) {
 
 // ContainerMixin for components that can hold ART nodes
 
-const ContainerMixin = assign({}, ReactMultiChild, {
+const ContainerMixin = assign({}, ReactMultiChild.Mixin, {
 
   /**
    * Moves a child component to the supplied index.
@@ -278,7 +278,7 @@ const NodeMixin = {
     listeners[type] = listener;
     if (listener) {
       if (!subscriptions[type]) {
-        subscriptions[type] = this.node.subscribe(type, listener, this);
+        subscriptions[type] = this.node.subscribe(type, this.handleEvent, this);
       }
     } else {
       if (subscriptions[type]) {
