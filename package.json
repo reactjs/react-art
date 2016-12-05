@@ -23,7 +23,8 @@
     "object-assign": "^4.0.1"
   },
   "peerDependencies": {
-    "react": "^15.0.0"
+    "react": "^15.4.1",
+    "react-dom": "^15.4.1"
   },
   "devDependencies": {
     "babel-jest": "^12.0.2",
@@ -34,9 +35,9 @@
     "gulp-babel": "^6.1.2",
     "gulp-shell": "^0.5.2",
     "jest-cli": "^12.0.2",
-    "react": "^15.0.2",
-    "react-addons-test-utils": "^15.0.2",
-    "react-dom": "^15.0.2"
+    "react": "^15.4.1",
+    "react-addons-test-utils": "^15.4.1",
+    "react-dom": "^15.4.1"
   },
   "scripts": {
     "prepublish": "gulp",
