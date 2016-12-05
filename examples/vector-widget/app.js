@@ -1,7 +1,6 @@
-"use strict";
 
-var React = require('react');
-var ReactDOM = require('react-dom');
-var VectorWidget = require('./VectorWidget');
+import React from 'react'
+import { render } from 'react-dom'
+import { VectorWidget } from './VectorWidget'
 
-ReactDOM.render(<VectorWidget />, document.getElementById('container'));
+render(<VectorWidget />, document.getElementById('container'));
