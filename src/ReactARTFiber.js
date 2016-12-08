@@ -454,6 +454,10 @@ const ARTRenderer = ReactFiberReconciler({
     // Noop
   },
 
+  getChildHostContext() {
+    return null;
+  },
+
   insertBefore(parentInstance, child, beforeChild) {
     invariant(
       child !== beforeChild,
