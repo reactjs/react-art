@@ -388,6 +388,10 @@ class Surface extends Component {
 
 const ARTRenderer = ReactFiberReconciler({
   appendChild(parentInstance, child) {
+    if (child.parentNode === parentInstance) {
+      child.eject();
+    }
+
     child.inject(parentInstance);
   },
 
@@ -451,6 +455,11 @@ const ARTRenderer = ReactFiberReconciler({
   },
 
   insertBefore(parentInstance, child, beforeChild) {
+    invariant(
+      child !== beforeChild,
+      'ReactART: Can not insert node before itself'
+    );
+
     child.injectBefore(beforeChild);
   },
 
@@ -472,9 +481,20 @@ const ARTRenderer = ReactFiberReconciler({
     // Noop
   },
 
+  resetTextContent(domElement) {
+    // Noop
+  },
+
   scheduleAnimationCallback: window.requestAnimationFrame,
 
   scheduleDeferredCallback: window.requestIdleCallback,
+
+  shouldSetTextContent(props) {
+    return (
+      typeof props.children === 'string' ||
+      typeof props.children === 'number'
+    );
+  },
 
   useSyncScheduling: true,
 });
