@@ -18,8 +18,8 @@ require('art/modes/current').setCurrent(
 const Mode = require('art/modes/current');
 const Transform = require('art/core/transform');
 const invariant = require('fbjs/lib/invariant');
-const React = require('react');
-const ReactFiberReconciler = require('react-dom/lib/ReactFiberReconciler');
+const React = require('React');
+const ReactFiberReconciler = require('ReactFiberReconciler');
 
 const { Component } = React;
 
@@ -408,7 +408,7 @@ const ARTRenderer = ReactFiberReconciler({
     // Noop
   },
 
-  commitUpdate(instance, oldProps, newProps) {
+  commitUpdate(instance, type, oldProps, newProps) {
     instance._applyProps(instance, newProps, oldProps);
   },
 
@@ -446,16 +446,12 @@ const ARTRenderer = ReactFiberReconciler({
     return instance;
   },
 
-  createTextInstance(text, internalInstanceHandle) {
+  createTextInstance(text, rootContainerInstance, internalInstanceHandle) {
     return text;
   },
 
   finalizeInitialChildren(domElement, type, props) {
     // Noop
-  },
-
-  getChildHostContext() {
-    return null;
   },
 
   insertBefore(parentInstance, child, beforeChild) {
@@ -471,7 +467,7 @@ const ARTRenderer = ReactFiberReconciler({
     // Noop
   },
 
-  prepareUpdate(domElement, oldProps, newProps) {
+  prepareUpdate(domElement, type, oldProps, newProps) {
     return true;
   },
 
@@ -487,6 +483,10 @@ const ARTRenderer = ReactFiberReconciler({
 
   resetTextContent(domElement) {
     // Noop
+  },
+
+  getChildHostContext() {
+    return null;
   },
 
   scheduleAnimationCallback: window.requestAnimationFrame,
