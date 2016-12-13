@@ -18,8 +18,8 @@ require('art/modes/current').setCurrent(
 const Mode = require('art/modes/current');
 const Transform = require('art/core/transform');
 const invariant = require('fbjs/lib/invariant');
-const React = require('React');
-const ReactFiberReconciler = require('ReactFiberReconciler');
+const React = require('react');
+const ReactFiberReconciler = require('react-dom/lib/ReactFiberReconciler');
 
 const { Component } = React;
 
