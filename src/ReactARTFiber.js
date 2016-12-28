@@ -18,6 +18,7 @@ require('art/modes/current').setCurrent(
 const Mode = require('art/modes/current');
 const Transform = require('art/core/transform');
 const invariant = require('fbjs/lib/invariant');
+const emptyObject = require('fbjs/lib/emptyObject');
 const React = require('react');
 const ReactFiberReconciler = require('react-dom/lib/ReactFiberReconciler');
 
@@ -327,9 +328,10 @@ class Surface extends Component {
 
     this._surface = Mode.Surface(+width, +height, this._tagRef);
 
-    this._mountNode = ARTRenderer.mountContainer(
+    this._mountNode = ARTRenderer.createContainer(this._surface);
+    ARTRenderer.updateContainer(
       this.props.children,
-      this._surface,
+      this._mountNode,
       this,
     );
   }
@@ -356,7 +358,11 @@ class Surface extends Component {
   }
 
   componentWillUnmount() {
-    ARTRenderer.unmountContainer(this._mountNode);
+    ARTRenderer.updateContainer(
+      null,
+      this._mountNode,
+      this,
+    );
   }
 
   render() {
@@ -408,6 +414,10 @@ const ARTRenderer = ReactFiberReconciler({
     // Noop
   },
 
+  commitMount(instance, type, newProps) {
+    // Noop
+  },
+
   commitUpdate(instance, type, oldProps, newProps) {
     instance._applyProps(instance, newProps, oldProps);
   },
@@ -451,7 +461,7 @@ const ARTRenderer = ReactFiberReconciler({
   },
 
   finalizeInitialChildren(domElement, type, props) {
-    // Noop
+    return false;
   },
 
   insertBefore(parentInstance, child, beforeChild) {
@@ -485,8 +495,12 @@ const ARTRenderer = ReactFiberReconciler({
     // Noop
   },
 
+  getRootHostContext() {
+    return emptyObject;
+  },
+
   getChildHostContext() {
-    return null;
+    return emptyObject;
   },
 
   scheduleAnimationCallback: window.requestAnimationFrame,
