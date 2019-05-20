@@ -1,3 +1,5 @@
+***Note**: This package is now part of the [facebook/react](https://github.com/facebook/react/tree/master/packages/react-art) monorepo.*
+
 # React ART
 
 React ART is a JavaScript library for drawing vector graphics using [React](http://facebook.github.io/react/).
