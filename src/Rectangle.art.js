@@ -47,11 +47,17 @@ var Rectangle = React.createClass({
     radiusBottomRight: PropTypes.number,
     radiusBottomLeft: PropTypes.number,
   },
+  
+  getDefaultProps: function() {
+    return {
+      radius: 0
+    };
+  },
 
   render: function() {
     var width = this.props.width;
     var height = this.props.height;
-    var radius = this.props.radius ? this.props.radius : 0;
+    var radius = this.props.radius;
 
     // if unspecified, radius(Top|Bottom)(Left|Right) defaults to the radius
     // property
